@@ -1,12 +1,20 @@
 import { useAuth } from "@clerk/clerk-expo";
-import { SplashScreen } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+
+SplashScreen.setOptions({
+  duration: 1000,
+  fade: true,
+});
 
 export function SplashScreenController() {
   const { isLoaded } = useAuth();
 
-  if (!isLoaded) {
-    SplashScreen.hideAsync();
-  }
+  useEffect(() => {
+    if (isLoaded) {
+      SplashScreen.hide();
+    }
+  }, [isLoaded]);
 
   return null;
 }
