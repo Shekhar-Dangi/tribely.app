@@ -1,4 +1,5 @@
-import { Link } from "expo-router";
+import LandingScreen from "@/components/LandingScreen";
+
 import { View } from "react-native";
 
 export default function Index() {
@@ -10,7 +11,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Link href={"/sign-in"}>Sign In</Link>
+      <LandingScreen />
     </View>
   );
 }

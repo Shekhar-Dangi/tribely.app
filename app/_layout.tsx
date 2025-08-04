@@ -15,7 +15,7 @@ export default function RootLayout() {
 function RootNavigator() {
   const { isSignedIn, isLoaded } = useAuth();
   return (
-    <Stack>
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={isLoaded && isSignedIn}>
         <Stack.Screen name="(tabs)" />
       </Stack.Protected>

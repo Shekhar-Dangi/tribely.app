@@ -1,9 +1,10 @@
-import { useAuth } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import { Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 export default function Index() {
   const { signOut } = useAuth();
+  const { user } = useUser();
   return (
     <View
       style={{
@@ -12,7 +13,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>Home Tabs</Text>
+      <Text>{user?.fullName}</Text>
       <Pressable
         onPress={() => {
           signOut();
@@ -20,7 +21,6 @@ export default function Index() {
       >
         <Text>Sign Out</Text>
       </Pressable>
-      <Link href={"/sign-in"}>sign in</Link>
     </View>
   );
 }
