@@ -1,11 +1,14 @@
+import "expo-dev-client";
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { Stack } from "expo-router";
 import { SplashScreenController } from "./splash";
 
+const key = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
 export default function RootLayout() {
   return (
-    <ClerkProvider tokenCache={tokenCache}>
+    <ClerkProvider publishableKey={key} tokenCache={tokenCache}>
       <SplashScreenController />
       <RootNavigator />
     </ClerkProvider>
