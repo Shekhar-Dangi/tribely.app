@@ -3,14 +3,19 @@ import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { tokenCache } from "@clerk/clerk-expo/token-cache";
 import { Stack } from "expo-router";
 import { SplashScreenController } from "./splash";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
+import { ConvexReactClient } from "convex/react";
 
-const key = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+const PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY || "";
+const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!);
 
 export default function RootLayout() {
   return (
-    <ClerkProvider publishableKey={key} tokenCache={tokenCache}>
-      <SplashScreenController />
-      <RootNavigator />
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} tokenCache={tokenCache}>
+      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+        <SplashScreenController />
+        <RootNavigator />
+      </ConvexProviderWithClerk>
     </ClerkProvider>
   );
 }

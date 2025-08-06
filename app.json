@@ -10,7 +10,11 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "6.0.0"
+      "buildNumber": "6.0.0",
+      "bundleIdentifier": "com.shekhardangi.tribely",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.shekhardangi.tribely",
-      "versionCode": 9
+      "versionCode": 10
     },
     "web": {
       "bundler": "metro",
@@ -47,6 +51,7 @@
       "eas": {
         "projectId": "05c66ce2-a15f-4f4e-983c-aab2e0f6bd35"
       }
-    }
+    },
+    "owner": "shekhardangi"
   }
 }
