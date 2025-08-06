@@ -69,6 +69,9 @@ export const getUserById = query({
 export const completeOnboarding = mutation({
   args: {
     clerkId: v.string(),
+    userType: v.optional(
+      v.union(v.literal("individual"), v.literal("gym"), v.literal("brand"))
+    ),
     stats: v.optional(
       v.object({
         height: v.number(),
@@ -133,6 +136,7 @@ export const completeOnboarding = mutation({
 
     await ctx.db.patch(user._id, {
       onBoardingStatus: true,
+      userType: args.userType,
       stats: args.stats,
       experiences: args.experiences,
       certifications: args.certifications,

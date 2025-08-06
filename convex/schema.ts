@@ -10,6 +10,11 @@ export default defineSchema({
     bio: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
 
+    // User type/category from onboarding
+    userType: v.optional(
+      v.union(v.literal("individual"), v.literal("gym"), v.literal("brand"))
+    ),
+
     // Personal Stats
     stats: v.optional(
       v.object({
