@@ -43,7 +43,7 @@ export default function LandingScreen() {
               style={styles.getStartedButton}
               activeOpacity={0.8}
             >
-              <Text style={styles.getStartedButtonText}>Get Started</Text>
+              <Text style={styles.getStartedButtonText}>Gett Started</Text>
             </TouchableOpacity>
           </Link>
         </View>
