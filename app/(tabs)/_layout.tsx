@@ -2,6 +2,7 @@ import { COLORS } from "@/constants/theme";
 import { useAuth } from "@clerk/clerk-expo";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Text } from "react-native";
 
 export default function RootLayout() {
   const { isLoaded, isSignedIn } = useAuth();
@@ -69,8 +70,17 @@ export default function RootLayout() {
         <Tabs.Screen
           name="profile"
           options={{
-            headerShown: false,
+            headerShown: true,
             title: "Profile",
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+            headerStyle: {
+              height: 100,
+              backgroundColor: COLORS.white,
+              borderWidth: 0,
+              borderBottomWidth: 0,
+              elevation: 0,
+            },
             tabBarIcon: ({ focused, color, size }) => (
               <Ionicons
                 name={focused ? "person" : "person-outline"}

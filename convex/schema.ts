@@ -107,6 +107,7 @@ export default defineSchema({
 
     // Media
     mediaUrl: v.optional(v.string()),
+    mediaPublicId: v.optional(v.string()), // Cloudinary public ID for deletions
     mediaType: v.optional(v.union(v.literal("image"), v.literal("video"))),
     mediaDuration: v.optional(v.number()), // for videos in seconds
     mediaQuality: v.optional(v.string()), // "720p", "1080p"

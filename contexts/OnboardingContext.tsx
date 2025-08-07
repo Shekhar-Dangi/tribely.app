@@ -9,7 +9,6 @@ import { useMutation } from "convex/react";
 import { useAuth } from "@clerk/clerk-expo";
 import { api } from "@/convex/_generated/api";
 
-// Helper functions moved outside component to prevent recreation
 const hasValidContent = (obj: any): boolean => {
   const values = Object.values(obj);
   const result = values.some((value) => {

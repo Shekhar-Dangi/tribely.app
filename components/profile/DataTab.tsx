@@ -213,7 +213,7 @@ export default function DataTab({
                   marginRight: 12,
                 }}
               >
-                <MaterialIcons name="school" size={20} color={COLORS.success} />
+                <MaterialIcons name="school" size={20} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={profile.dataCardTitle}>{cert.title}</Text>
@@ -225,22 +225,22 @@ export default function DataTab({
                     {cert.description}
                   </Text>
                 )}
-                {cert.credentialId && (
+                {/* {cert.credentialId && (
                   <Text style={profile.dataCardDescription}>
                     ID: {cert.credentialId}
                   </Text>
-                )}
+                )} */}
                 <Text style={profile.dataCardDate}>
                   Issued: {formatDate(cert.issueDate)}
                   {!cert.isActive &&
                     cert.expiryDate &&
                     ` • Expires: ${formatDate(cert.expiryDate)}`}
                 </Text>
-                {cert.isActive && (
+                {/* {cert.isActive && (
                   <View style={profile.activeBadge}>
                     <Text style={profile.activeBadgeText}>Active</Text>
                   </View>
-                )}
+                )} */}
               </View>
             </View>
           ))}

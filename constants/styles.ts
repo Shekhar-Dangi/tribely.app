@@ -10,6 +10,15 @@ export const tabs = StyleSheet.create({
     padding: 10,
     paddingTop: 25,
   },
+  topBar: {
+    padding: 20,
+    paddingTop: 40,
+    backgroundColor: COLORS.lightGray,
+  },
+  mic: {
+    width: 80,
+    height: 90,
+  },
 });
 
 export const union = StyleSheet.create({
@@ -183,7 +192,10 @@ export const profile = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
     padding: SPACING.lg,
-    paddingTop: SPACING.xxxl,
+    // paddingTop: 120,
+    // marginTop: 100,
+    borderTopColor: COLORS.mediumGray,
+    borderWidth: 1,
   },
 
   // Profile Header
@@ -340,7 +352,7 @@ export const profile = StyleSheet.create({
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-around",
-    // marginBottom: SPACING.sm,
+    marginBottom: SPACING.md,
   },
   statItem: {
     alignItems: "center",
@@ -369,12 +381,13 @@ export const profile = StyleSheet.create({
   // Card Styles for Data
   dataCard: {
     ...SHADOWS.small,
+    marginBottom: SPACING.md,
   },
   dataCardTitle: {
-    fontSize: FONTS.sizes.md,
-    // ...FONTS.bold,
+    fontSize: FONTS.sizes.lg,
+    ...FONTS.bold,
     color: COLORS.primary,
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.md,
   },
   dataCardSubtitle: {
     fontSize: FONTS.sizes.sm,
@@ -421,7 +434,7 @@ export const profile = StyleSheet.create({
   },
   primaryButton: {
     display: "flex",
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.secondary,
     paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.xs,
     borderRadius: BORDER_RADIUS.xs,

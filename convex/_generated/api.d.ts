@@ -13,7 +13,10 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as cloudinary from "../cloudinary.js";
+import type * as cloudinaryActions from "../cloudinaryActions.js";
 import type * as http from "../http.js";
+import type * as posts from "../posts.js";
 import type * as users from "../users.js";
 
 /**
@@ -25,7 +28,10 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  cloudinary: typeof cloudinary;
+  cloudinaryActions: typeof cloudinaryActions;
   http: typeof http;
+  posts: typeof posts;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

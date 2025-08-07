@@ -5,8 +5,8 @@ import CertificationCard from "@/components/CertificationCard";
 import { onboard, tabs } from "@/constants/styles";
 import { router } from "expo-router";
 import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
-import { useForm, useFieldArray, useWatch } from "react-hook-form";
-import { useState, useEffect } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { useState } from "react";
 import {
   useOnboarding,
   CertificationsForm,
@@ -27,19 +27,6 @@ export default function Certifications() {
     control,
     name: "certifications",
   });
-
-  // Watch for form changes and update context in real-time
-  const watchedCertifications = useWatch({
-    control,
-    name: "certifications",
-  });
-
-  // Update context whenever form data changes
-  useEffect(() => {
-    if (watchedCertifications) {
-      updateCertifications({ certifications: watchedCertifications });
-    }
-  }, [watchedCertifications, updateCertifications]);
 
   const addCertification = () => {
     append({
@@ -67,9 +54,10 @@ export default function Certifications() {
       const emptyCertifications: CertificationsForm = {
         certifications: [],
       };
+      updateCertifications(emptyCertifications);
 
-      // Submit complete onboarding data to database with empty certifications
-      await submitToDatabase(emptyCertifications);
+      // Submit complete onboarding data to database
+      await submitToDatabase();
 
       // Show success feedback
       Alert.alert(
@@ -184,7 +172,7 @@ export default function Certifications() {
         showSkip={true}
         showBack={true}
         onBack={() => router.back()}
-        nextText={isSubmitting ? "Completing..." : "Complete Profile"}
+        nextText={isSubmitting ? "Submiting..." : "Submit"}
         nextDisabled={isSubmitting}
       />
     </View>

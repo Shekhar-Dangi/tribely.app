@@ -1,20 +1,17 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import { profile } from "@/constants/styles";
 import { COLORS } from "@/constants/theme";
 import DataTab from "@/components/profile/DataTab";
+import PostsTab from "@/components/posts/PostsTab";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function Profile() {
   const { user } = useUser();
   const [activeTab, setActiveTab] = useState("data");
 
-  // Query user data from Convex
-  const userData = useQuery(api.users.getUserByClerkId, {
-    clerkId: user?.id || "",
-  });
+  const userData = useCurrentUser();
 
   const handleEdit = () => {
     // Navigate to edit profile
@@ -39,9 +36,14 @@ export default function Profile() {
           />
         );
       case "posts":
-        return (
+        return userData?._id ? (
+          <PostsTab
+            userId={userData._id}
+            // Remove onPostPress to use default modal behavior
+          />
+        ) : (
           <View style={profile.tabContent}>
-            <Text style={profile.contentPlaceholder}>Posts coming soon!</Text>
+            <Text style={profile.contentPlaceholder}>Loading posts...</Text>
           </View>
         );
       case "workouts":
@@ -67,7 +69,6 @@ export default function Profile() {
 
   return (
     <View style={profile.container}>
-      {/* Header */}
       <View style={profile.profileHeader}>
         <View style={profile.avatarContainer}>
           <Image
