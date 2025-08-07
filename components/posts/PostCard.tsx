@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import {
   COLORS,
   FONTS,
@@ -7,20 +7,10 @@ import {
   SHADOWS,
 } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-
-const { width } = Dimensions.get("window");
-const POST_IMAGE_SIZE = (width - SPACING.xl * 2 - SPACING.sm * 2) / 3;
+import { Post } from "@/types/schema";
 
 interface PostCardProps {
-  post: {
-    _id: string;
-    content?: string;
-    mediaUrl?: string;
-    mediaType?: "image" | "video";
-    likeCount: number;
-    commentCount: number;
-    createdAt: number;
-  };
+  post: Post;
   variant?: "grid" | "full";
   onPress?: () => void;
 }
@@ -148,8 +138,8 @@ export default function PostCard({
 const styles = {
   // Grid variant styles
   gridItem: {
-    width: POST_IMAGE_SIZE,
-    height: POST_IMAGE_SIZE,
+    flex: 1,
+    aspectRatio: 1, // Keep it square
     marginBottom: SPACING.xs,
   },
   gridImageContainer: {

@@ -13,9 +13,13 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as brands from "../brands.js";
 import type * as cloudinary from "../cloudinary.js";
 import type * as cloudinaryActions from "../cloudinaryActions.js";
+import type * as fileUploads from "../fileUploads.js";
+import type * as gyms from "../gyms.js";
 import type * as http from "../http.js";
+import type * as individuals from "../individuals.js";
 import type * as posts from "../posts.js";
 import type * as users from "../users.js";
 
@@ -28,9 +32,13 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  brands: typeof brands;
   cloudinary: typeof cloudinary;
   cloudinaryActions: typeof cloudinaryActions;
+  fileUploads: typeof fileUploads;
+  gyms: typeof gyms;
   http: typeof http;
+  individuals: typeof individuals;
   posts: typeof posts;
   users: typeof users;
 }>;

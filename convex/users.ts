@@ -26,20 +26,13 @@ export const createUser = mutation({
         args.name.toLowerCase().replace(/\s+/g, "") || `user_${Date.now()}`,
       bio: undefined,
       avatarUrl: args.avatarUrl,
-      stats: undefined,
-      experiences: undefined,
-      certifications: undefined,
+      userType: "individual", // default type, will be updated during onboarding
       socialLinks: undefined,
-      affiliation: undefined,
-      activityScore: 0, // initial value for leaderboard
       isVerified: false,
       isPremium: false,
       followerCount: 0,
       followingCount: 0,
       onBoardingStatus: false, // User needs to complete onboarding
-      isTrainingEnabled: false,
-      trainingPrice: undefined,
-      lastActivityUpdate: Date.now(),
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -59,6 +52,50 @@ export const getUserByClerkId = query({
   },
 });
 
+// Get user with profile by clerkId
+export const getUserWithProfileByClerkId = query({
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+
+    if (!user) return null;
+
+    let profileData = null;
+
+    // Fetch specialized profile based on user type
+    switch (user.userType) {
+      case "individual":
+        profileData = await ctx.db
+          .query("individuals")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .first();
+        break;
+
+      case "gym":
+        profileData = await ctx.db
+          .query("gyms")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .first();
+        break;
+
+      case "brand":
+        profileData = await ctx.db
+          .query("brands")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .first();
+        break;
+    }
+
+    return {
+      ...user,
+      profile: profileData,
+    };
+  },
+});
+
 export const getUserById = query({
   args: { userId: v.id("users") },
   handler: async (ctx, args) => {
@@ -69,9 +106,12 @@ export const getUserById = query({
 export const completeOnboarding = mutation({
   args: {
     clerkId: v.string(),
-    userType: v.optional(
-      v.union(v.literal("individual"), v.literal("gym"), v.literal("brand"))
+    userType: v.union(
+      v.literal("individual"),
+      v.literal("gym"),
+      v.literal("brand")
     ),
+    // Individual-specific data
     stats: v.optional(
       v.object({
         height: v.number(),
@@ -115,6 +155,10 @@ export const completeOnboarding = mutation({
         })
       )
     ),
+    affiliation: v.optional(v.string()),
+    isTrainingEnabled: v.optional(v.boolean()),
+    trainingPrice: v.optional(v.number()),
+    // Common data
     socialLinks: v.optional(
       v.object({
         instagram: v.optional(v.string()),
@@ -122,7 +166,6 @@ export const completeOnboarding = mutation({
         twitter: v.optional(v.string()),
       })
     ),
-    affiliation: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await ctx.db
@@ -134,17 +177,320 @@ export const completeOnboarding = mutation({
       throw new Error("User not found");
     }
 
+    // Update base user record
     await ctx.db.patch(user._id, {
       onBoardingStatus: true,
       userType: args.userType,
-      stats: args.stats,
-      experiences: args.experiences,
-      certifications: args.certifications,
       socialLinks: args.socialLinks,
-      affiliation: args.affiliation,
+      updatedAt: Date.now(),
+    });
+
+    // Create specialized profile based on user type
+    if (args.userType === "individual") {
+      await ctx.db.insert("individuals", {
+        userId: user._id,
+        stats: args.stats,
+        experiences: args.experiences,
+        certifications: args.certifications,
+        affiliation: args.affiliation,
+        isTrainingEnabled: args.isTrainingEnabled || false,
+        trainingPrice: args.trainingPrice,
+        activityScore: 0,
+        lastActivityUpdate: Date.now(),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    } else if (args.userType === "gym") {
+      // Create basic gym profile - can be enhanced later
+      await ctx.db.insert("gyms", {
+        userId: user._id,
+        businessInfo: {
+          address: undefined,
+          phone: undefined,
+          website: undefined,
+          operatingHours: undefined,
+          amenities: undefined,
+        },
+        membershipPlans: undefined,
+        stats: undefined,
+        verification: undefined,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    } else if (args.userType === "brand") {
+      // Create basic brand profile - can be enhanced later
+      await ctx.db.insert("brands", {
+        userId: user._id,
+        businessInfo: {
+          companySize: undefined,
+          industry: undefined,
+          website: undefined,
+          headquarters: undefined,
+          contactInfo: undefined,
+        },
+        partnerships: undefined,
+        campaigns: undefined,
+        verification: undefined,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    }
+
+    return { success: true };
+  },
+});
+
+// ──────── NEW FUNCTIONS FOR SPECIALIZED PROFILES ────────
+
+// Get user with their specialized profile data
+export const getUserWithProfile = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return null;
+
+    let profileData = null;
+
+    // Fetch specialized profile based on user type
+    switch (user.userType) {
+      case "individual":
+        profileData = await ctx.db
+          .query("individuals")
+          .withIndex("by_user", (q) => q.eq("userId", args.userId))
+          .first();
+        break;
+
+      case "gym":
+        profileData = await ctx.db
+          .query("gyms")
+          .withIndex("by_user", (q) => q.eq("userId", args.userId))
+          .first();
+        break;
+
+      case "brand":
+        profileData = await ctx.db
+          .query("brands")
+          .withIndex("by_user", (q) => q.eq("userId", args.userId))
+          .first();
+        break;
+    }
+
+    return {
+      ...user,
+      profile: profileData,
+    };
+  },
+});
+
+// Get user by username with profile
+export const getUserByUsername = query({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_username", (q) => q.eq("username", args.username))
+      .first();
+
+    if (!user) return null;
+
+    let profileData = null;
+    switch (user.userType) {
+      case "individual":
+        profileData = await ctx.db
+          .query("individuals")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .first();
+        break;
+
+      case "gym":
+        profileData = await ctx.db
+          .query("gyms")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .first();
+        break;
+
+      case "brand":
+        profileData = await ctx.db
+          .query("brands")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .first();
+        break;
+    }
+
+    return {
+      ...user,
+      profile: profileData,
+    };
+  },
+});
+
+// Update base user information
+export const updateUser = mutation({
+  args: {
+    userId: v.id("users"),
+    username: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    avatarUrl: v.optional(v.string()),
+    socialLinks: v.optional(
+      v.object({
+        instagram: v.optional(v.string()),
+        youtube: v.optional(v.string()),
+        twitter: v.optional(v.string()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const { userId, ...updates } = args;
+
+    // Remove undefined values
+    const cleanUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([_, value]) => value !== undefined)
+    );
+
+    if (Object.keys(cleanUpdates).length === 0) {
+      throw new Error("No valid updates provided");
+    }
+
+    await ctx.db.patch(userId, {
+      ...cleanUpdates,
       updatedAt: Date.now(),
     });
 
     return { success: true };
+  },
+});
+
+// Search users by username
+export const searchUsers = query({
+  args: {
+    query: v.string(),
+    userType: v.optional(
+      v.union(v.literal("individual"), v.literal("gym"), v.literal("brand"))
+    ),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 20;
+
+    let usersQuery = ctx.db.query("users");
+
+    // Apply user type filter if specified
+    if (args.userType) {
+      usersQuery = usersQuery.filter((q) =>
+        q.eq(q.field("userType"), args.userType)
+      );
+    }
+
+    // Search by username (case-insensitive)
+    const users = await usersQuery
+      .filter((q) =>
+        q.or(
+          q.gte(q.field("username"), args.query.toLowerCase()),
+          q.lte(q.field("username"), args.query.toLowerCase() + "~")
+        )
+      )
+      .take(limit);
+
+    // Get profiles for each user
+    const usersWithProfiles = await Promise.all(
+      users.map(async (user) => {
+        let profileData = null;
+
+        switch (user.userType) {
+          case "individual":
+            profileData = await ctx.db
+              .query("individuals")
+              .withIndex("by_user", (q) => q.eq("userId", user._id))
+              .first();
+            break;
+
+          case "gym":
+            profileData = await ctx.db
+              .query("gyms")
+              .withIndex("by_user", (q) => q.eq("userId", user._id))
+              .first();
+            break;
+
+          case "brand":
+            profileData = await ctx.db
+              .query("brands")
+              .withIndex("by_user", (q) => q.eq("userId", user._id))
+              .first();
+            break;
+        }
+
+        return {
+          ...user,
+          profile: profileData,
+        };
+      })
+    );
+
+    return usersWithProfiles;
+  },
+});
+
+// Get trending users (most active or most followed)
+export const getTrendingUsers = query({
+  args: {
+    limit: v.optional(v.number()),
+    userType: v.optional(
+      v.union(v.literal("individual"), v.literal("gym"), v.literal("brand"))
+    ),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 10;
+
+    let usersQuery = ctx.db.query("users");
+
+    // Apply user type filter if specified
+    if (args.userType) {
+      usersQuery = usersQuery.filter((q) =>
+        q.eq(q.field("userType"), args.userType)
+      );
+    }
+
+    // Order by follower count (trending)
+    const users = await usersQuery.order("desc").take(limit * 2); // Take more to filter after profile fetch
+
+    // Get profiles for each user
+    const usersWithProfiles = await Promise.all(
+      users.map(async (user) => {
+        let profileData = null;
+
+        switch (user.userType) {
+          case "individual":
+            profileData = await ctx.db
+              .query("individuals")
+              .withIndex("by_user", (q) => q.eq("userId", user._id))
+              .first();
+            break;
+
+          case "gym":
+            profileData = await ctx.db
+              .query("gyms")
+              .withIndex("by_user", (q) => q.eq("userId", user._id))
+              .first();
+            break;
+
+          case "brand":
+            profileData = await ctx.db
+              .query("brands")
+              .withIndex("by_user", (q) => q.eq("userId", user._id))
+              .first();
+            break;
+        }
+
+        return {
+          ...user,
+          profile: profileData,
+        };
+      })
+    );
+
+    // Sort by follower count and limit results
+    return usersWithProfiles
+      .sort((a, b) => b.followerCount - a.followerCount)
+      .slice(0, limit);
   },
 });

@@ -13,6 +13,7 @@ import {
 import { useState, useRef, useEffect } from "react";
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
+import { Post } from "@/types/schema";
 
 interface Comment {
   id: string;
@@ -29,20 +30,7 @@ interface Comment {
 interface CommentsModalProps {
   visible: boolean;
   onClose: () => void;
-  post: {
-    _id: string;
-    content?: string;
-    mediaUrl?: string;
-    mediaType?: "image" | "video";
-    likeCount: number;
-    commentCount: number;
-    createdAt: number;
-    user?: {
-      username: string;
-      avatarUrl?: string;
-      isVerified?: boolean;
-    };
-  };
+  post: Post;
   comments?: Comment[];
   onSubmitComment?: (comment: string) => void;
 }

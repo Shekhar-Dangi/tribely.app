@@ -127,6 +127,34 @@ export const getUserPosts = query({
     const postsWithUsers = await Promise.all(
       posts.map(async (post) => {
         const user = await ctx.db.get(post.userId);
+
+        // Get additional profile data based on user type
+        let profileData = null;
+        if (user) {
+          switch (user.userType) {
+            case "individual":
+              profileData = await ctx.db
+                .query("individuals")
+                .withIndex("by_user", (q) => q.eq("userId", user._id))
+                .first();
+              break;
+
+            case "gym":
+              profileData = await ctx.db
+                .query("gyms")
+                .withIndex("by_user", (q) => q.eq("userId", user._id))
+                .first();
+              break;
+
+            case "brand":
+              profileData = await ctx.db
+                .query("brands")
+                .withIndex("by_user", (q) => q.eq("userId", user._id))
+                .first();
+              break;
+          }
+        }
+
         return {
           ...post,
           user: user
@@ -135,6 +163,9 @@ export const getUserPosts = query({
                 avatarUrl: user.avatarUrl,
                 isVerified: user.isVerified,
                 isPremium: user.isPremium,
+                userType: user.userType,
+                // Include relevant profile data
+                profile: profileData,
               }
             : null,
         };

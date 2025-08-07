@@ -398,12 +398,12 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
         console.log("Transformed data for Convex:", transformedData);
 
         // Submit to Convex database
-        const result = await completeOnboardingMutation({
-          clerkId: userId,
-          ...transformedData,
-        });
+        // const result = await completeOnboardingMutation({
+        //   clerkId: userId,
+        //   ...transformedData,
+        // });
 
-        console.log("Onboarding data submitted successfully:", result);
+        // console.log("Onboarding data submitted successfully:", result);
 
         // Reset the form data after successful submission
         resetData();

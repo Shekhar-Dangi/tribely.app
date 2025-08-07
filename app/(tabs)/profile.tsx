@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useUser } from "@clerk/clerk-expo";
+import { Id } from "@/convex/_generated/dataModel";
 import { profile } from "@/constants/styles";
 import { COLORS } from "@/constants/theme";
 import DataTab from "@/components/profile/DataTab";
 import PostsTab from "@/components/posts/PostsTab";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { isIndividualProfile } from "@/types/schema";
 
 export default function Profile() {
   const { user } = useUser();
@@ -29,16 +31,32 @@ export default function Profile() {
         return (
           <DataTab
             bio={userData?.bio}
-            stats={userData?.stats}
-            experiences={userData?.experiences}
-            certifications={userData?.certifications}
-            affiliation={userData?.affiliation}
+            stats={
+              userData?.profile && isIndividualProfile(userData.profile)
+                ? userData.profile.stats
+                : undefined
+            }
+            experiences={
+              userData?.profile && isIndividualProfile(userData.profile)
+                ? userData.profile.experiences
+                : undefined
+            }
+            certifications={
+              userData?.profile && isIndividualProfile(userData.profile)
+                ? userData.profile.certifications
+                : undefined
+            }
+            affiliation={
+              userData?.profile && isIndividualProfile(userData.profile)
+                ? userData.profile.affiliation
+                : undefined
+            }
           />
         );
       case "posts":
         return userData?._id ? (
           <PostsTab
-            userId={userData._id}
+            userId={userData._id as Id<"users">}
             // Remove onPostPress to use default modal behavior
           />
         ) : (

@@ -4,10 +4,9 @@ import ProgressBar from "@/components/ProgressBar";
 import ExperienceCard from "@/components/ExperienceCard";
 import { onboard, tabs } from "@/constants/styles";
 import { router } from "expo-router";
-import { useForm, useFieldArray, useWatch } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { useOnboarding, ExperiencesForm } from "@/contexts/OnboardingContext";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { useEffect } from "react";
 
 export default function Experiences() {
   const { data, updateExperiences } = useOnboarding();
@@ -23,19 +22,6 @@ export default function Experiences() {
     control,
     name: "experiences",
   });
-
-  // Watch for form changes and update context in real-time
-  const watchedExperiences = useWatch({
-    control,
-    name: "experiences",
-  });
-
-  // Update context whenever form data changes
-  useEffect(() => {
-    if (watchedExperiences) {
-      updateExperiences({ experiences: watchedExperiences });
-    }
-  }, [watchedExperiences, updateExperiences]);
 
   const addExperience = () => {
     append({

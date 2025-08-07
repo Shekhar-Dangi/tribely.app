@@ -12,6 +12,7 @@ import PostCard from "./PostCard";
 import PostModal from "./PostModal";
 import { COLORS, FONTS, SPACING } from "@/constants/theme";
 import { useState } from "react";
+import { Post } from "@/types/schema";
 
 interface PostsGridProps {
   userId: Id<"users">;
@@ -25,7 +26,7 @@ export default function PostsGrid({
   onPostPress,
 }: PostsGridProps) {
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
   // Fetch user's posts
@@ -96,7 +97,7 @@ export default function PostsGrid({
           data={posts}
           renderItem={renderPost}
           keyExtractor={(item) => item._id}
-          numColumns={3}
+          numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.gridContent}
           showsVerticalScrollIndicator={false}

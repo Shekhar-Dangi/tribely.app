@@ -4,7 +4,7 @@ import ProgressBar from "@/components/ProgressBar";
 import PersonalRecordCard from "@/components/PersonalRecordCard";
 import { onboard, tabs, union } from "@/constants/styles";
 import { router } from "expo-router";
-import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { useOnboarding, PersonalStatsForm } from "@/contexts/OnboardingContext";
 import {
   View,
@@ -13,7 +13,6 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { useEffect } from "react";
 
 export default function Index() {
   const { data, updatePersonalStats } = useOnboarding();
@@ -29,22 +28,6 @@ export default function Index() {
     control,
     name: "personalRecords",
   });
-
-  // Watch for form changes and update context in real-time
-  const watchedPersonalStats = useWatch({
-    control,
-  });
-
-  // Update context whenever form data changes
-  useEffect(() => {
-    if (watchedPersonalStats && 
-        watchedPersonalStats.height !== undefined && 
-        watchedPersonalStats.weight !== undefined &&
-        watchedPersonalStats.bodyFat !== undefined &&
-        watchedPersonalStats.personalRecords !== undefined) {
-      updatePersonalStats(watchedPersonalStats as PersonalStatsForm);
-    }
-  }, [watchedPersonalStats, updatePersonalStats]);
 
   const addPersonalRecord = () => {
     append({ exerciseName: "", subtitle: "", date: "" });

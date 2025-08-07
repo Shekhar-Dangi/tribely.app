@@ -13,27 +13,14 @@ import { useState } from "react";
 import { COLORS, FONTS, SPACING } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import CommentsModal from "./CommentsModal";
+import { Post } from "@/types/schema";
 
 const { width, height } = Dimensions.get("window");
 
 interface PostModalProps {
   visible: boolean;
   onClose: () => void;
-  post: {
-    _id: string;
-    content?: string;
-    mediaUrl?: string;
-    mediaType?: "image" | "video";
-    likeCount: number;
-    commentCount: number;
-    createdAt: number;
-    user?: {
-      username: string;
-      avatarUrl?: string;
-      isVerified?: boolean;
-      isPremium?: boolean;
-    };
-  } | null;
+  post: Post | null;
 }
 
 export default function PostModal({ visible, onClose, post }: PostModalProps) {
@@ -179,11 +166,13 @@ export default function PostModal({ visible, onClose, post }: PostModalProps) {
         </KeyboardAvoidingView>
 
         {/* Comments Modal */}
-        <CommentsModal
-          visible={commentsVisible}
-          onClose={() => setCommentsVisible(false)}
-          post={post}
-        />
+        {post && (
+          <CommentsModal
+            visible={commentsVisible}
+            onClose={() => setCommentsVisible(false)}
+            post={post}
+          />
+        )}
       </View>
     </Modal>
   );
