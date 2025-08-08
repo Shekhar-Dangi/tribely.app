@@ -62,60 +62,75 @@ export default function Category() {
   const onSubmit = (formData: CategoryForm) => {
     updateCategory(formData);
     console.log("Category saved to context:", formData);
-    router.push("/(onboard)/experiences");
+
+    // Route based on selected category
+    switch (formData.category) {
+      case "individual":
+        router.push("/(onboard)"); // Individual flow: index -> experiences -> certifications
+        break;
+      case "gym":
+        router.push("./gym/"); // Gym placeholder page
+        break;
+      case "brand":
+        router.push("./brand/"); // Brand placeholder page
+        break;
+      default:
+        router.push("./"); // Fallback to individual flow
+    }
   };
 
   return (
     <View style={tabs.container}>
-      <ProgressBar currentStep={2} totalSteps={4} progress={50} />
+      {/* <ProgressBar currentStep={} totalSteps={4} progress={50} /> */}
+      <View style={{ paddingTop: 50 }}>
+        <ScrollView
+          style={[onboard.scrollView]}
+          showsVerticalScrollIndicator={false}
+        >
+          <Header
+            title="User Category"
+            subtitle="What best describes you? This helps us personalize your experience."
+          />
 
-      <ScrollView
-        style={onboard.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
-        <Header
-          title="User Category"
-          subtitle="What best describes you? This helps us personalize your experience."
-        />
+          <Controller
+            control={control}
+            name="category"
+            rules={{
+              required: "Please select a category",
+            }}
+            render={({ field: { onChange, value } }) => (
+              <>
+                {categories.map((category) => (
+                  <SelectionCard
+                    key={category.id}
+                    title={category.title}
+                    subtitle={category.subtitle}
+                    description={category.description}
+                    icon={category.icon}
+                    isSelected={value === category.id}
+                    onPress={() => onChange(category.id)}
+                  />
+                ))}
+              </>
+            )}
+          />
 
-        <Controller
-          control={control}
-          name="category"
-          rules={{
-            required: "Please select a category",
-          }}
-          render={({ field: { onChange, value } }) => (
-            <>
-              {categories.map((category) => (
-                <SelectionCard
-                  key={category.id}
-                  title={category.title}
-                  subtitle={category.subtitle}
-                  description={category.description}
-                  icon={category.icon}
-                  isSelected={value === category.id}
-                  onPress={() => onChange(category.id)}
-                />
-              ))}
-            </>
+          {errors.category && (
+            <View style={{ marginHorizontal: 32, marginTop: 8 }}>
+              <Text style={{ color: "red", fontSize: 12 }}>
+                {errors.category.message}
+              </Text>
+            </View>
           )}
+        </ScrollView>
+
+        <NavigationButtons
+          onNext={handleSubmit(onSubmit)}
+          showSkip={true}
+          showBack={true}
+          onBack={() => router.back()}
         />
-
-        {errors.category && (
-          <View style={{ marginHorizontal: 32, marginTop: 8 }}>
-            <Text style={{ color: "red", fontSize: 12 }}>
-              {errors.category.message}
-            </Text>
-          </View>
-        )}
-      </ScrollView>
-
-      <NavigationButtons
-        onNext={handleSubmit(onSubmit)}
-        showSkip={true}
-        showBack={true}
-        onBack={() => router.back()}
-      />
+      </View>
     </View>
   );
 }

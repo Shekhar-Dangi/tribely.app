@@ -153,6 +153,12 @@ const transformDataForConvex = (data: OnboardingData) => {
               sunday:
                 data.businessInfo.operatingHours.sunday.trim() || undefined,
             },
+            amenities: data.businessInfo.amenities
+              ? data.businessInfo.amenities
+                  .split("\n")
+                  .map((amenity) => amenity.trim())
+                  .filter((amenity) => amenity !== "")
+              : undefined,
           }
         : undefined;
 
@@ -163,25 +169,40 @@ const transformDataForConvex = (data: OnboardingData) => {
             .map((plan: MembershipPlan) => ({
               name: plan.name.trim(),
               price: parseFloat(plan.price),
-              duration: plan.duration,
-              features: plan.features.filter(
-                (feature) => feature.trim() !== ""
-              ),
+              duration: plan.duration.trim(),
+              features: plan.features[0]
+                ? plan.features[0]
+                    .split("\n")
+                    .map((feature) => feature.trim())
+                    .filter((feature) => feature !== "")
+                : [],
             }))
             .filter((plan: any) => plan.name && !isNaN(plan.price))
         : [];
 
       // Transform stats
+      console.log("🔧 Raw gymStats data:", data.gymStats);
+      console.log(
+        "🔧 memberCount type:",
+        typeof data.gymStats?.memberCount,
+        "value:",
+        data.gymStats?.memberCount
+      );
+      console.log(
+        "🔧 trainerCount type:",
+        typeof data.gymStats?.trainerCount,
+        "value:",
+        data.gymStats?.trainerCount
+      );
+
       const gymStats = data.gymStats
         ? {
-            memberCount: data.gymStats.memberCount
-              ? parseInt(data.gymStats.memberCount)
-              : 0,
-            trainerCount: data.gymStats.trainerCount
-              ? parseInt(data.gymStats.trainerCount)
-              : 0,
+            memberCount: parseInt(String(data.gymStats.memberCount), 10) || 0,
+            trainerCount: parseInt(String(data.gymStats.trainerCount), 10) || 0,
           }
-        : undefined;
+        : { memberCount: 0, trainerCount: 0 };
+
+      console.log("🔧 Transformed gymStats:", gymStats);
 
       return {
         ...baseData,
@@ -193,23 +214,18 @@ const transformDataForConvex = (data: OnboardingData) => {
     }
 
     case "brand": {
-      // Transform business info
-      const brandBusinessInfo = data.brandBusinessInfo
-        ? {
-            industry: data.brandBusinessInfo.industry.trim() || undefined,
-            website: data.brandBusinessInfo.website.trim() || undefined,
-            headquarters:
-              data.brandBusinessInfo.headquarters.trim() || undefined,
-            contactInfo: {
-              phone:
-                data.brandBusinessInfo.contactInfo.phone.trim() || undefined,
-              email:
-                data.brandBusinessInfo.contactInfo.email.trim() || undefined,
-              address:
-                data.brandBusinessInfo.contactInfo.address.trim() || undefined,
-            },
-          }
-        : undefined;
+      // Transform contact info and business info
+      const brandBusinessInfo = {
+        industry: data.brandBusinessInfo?.industry?.trim() || undefined,
+        headquarters: data.brandBusinessInfo?.headquarters?.trim() || undefined,
+        website: data.brandContactInfo?.website?.trim() || undefined,
+        contactInfo: {
+          phone: data.brandContactInfo?.contactInfo.phone?.trim() || undefined,
+          email: data.brandContactInfo?.contactInfo.email?.trim() || undefined,
+          address:
+            data.brandContactInfo?.contactInfo.address?.trim() || undefined,
+        },
+      };
 
       // Transform partnerships
       const partnerships = data.partnerships?.partnerships
@@ -302,6 +318,7 @@ export interface BusinessInfoForm {
     saturday: string;
     sunday: string;
   };
+  amenities: string;
 }
 
 export interface MembershipPlan {
@@ -316,20 +333,23 @@ export interface MembershipPlansForm {
 }
 
 export interface GymStatsForm {
-  memberCount: string;
-  trainerCount: string;
+  memberCount: number;
+  trainerCount: number;
 }
 
 // ============== BRAND INTERFACES ==============
-export interface BrandBusinessInfoForm {
-  industry: string;
+export interface BrandContactInfoForm {
   website: string;
-  headquarters: string;
   contactInfo: {
     phone: string;
     email: string;
     address: string;
   };
+}
+
+export interface BrandBusinessInfoForm {
+  industry: string;
+  headquarters: string;
 }
 
 export interface Partnership {
@@ -357,6 +377,7 @@ export interface OnboardingData {
   membershipPlans?: MembershipPlansForm;
   gymStats?: GymStatsForm;
   // Brand fields - optional for other user types
+  brandContactInfo?: BrandContactInfoForm;
   brandBusinessInfo?: BrandBusinessInfoForm;
   partnerships?: PartnershipsForm;
 }
@@ -374,6 +395,7 @@ interface OnboardingContextType {
   updateMembershipPlans: (data: MembershipPlansForm) => void;
   updateGymStats: (data: GymStatsForm) => void;
   // Brand methods
+  updateBrandContactInfo: (data: BrandContactInfoForm) => void;
   updateBrandBusinessInfo: (data: BrandBusinessInfoForm) => void;
   updatePartnerships: (data: PartnershipsForm) => void;
   // Shared methods
@@ -381,7 +403,9 @@ interface OnboardingContextType {
   resetData: () => void;
   isComplete: () => boolean;
   submitToDatabase: (
-    overrideCertifications?: CertificationsForm
+    overrideCertifications?: CertificationsForm,
+    overrideGymStats?: GymStatsForm,
+    overridePartnerships?: PartnershipsForm
   ) => Promise<void>;
 }
 
@@ -437,6 +461,7 @@ const defaultBusinessInfo: BusinessInfoForm = {
     saturday: "",
     sunday: "",
   },
+  amenities: "",
 };
 
 const defaultMembershipPlans: MembershipPlansForm = {
@@ -451,19 +476,22 @@ const defaultMembershipPlans: MembershipPlansForm = {
 };
 
 const defaultGymStats: GymStatsForm = {
-  memberCount: "",
-  trainerCount: "",
+  memberCount: 0,
+  trainerCount: 0,
 };
 
-const defaultBrandBusinessInfo: BrandBusinessInfoForm = {
-  industry: "",
+const defaultBrandContactInfo: BrandContactInfoForm = {
   website: "",
-  headquarters: "",
   contactInfo: {
     phone: "",
     email: "",
     address: "",
   },
+};
+
+const defaultBrandBusinessInfo: BrandBusinessInfoForm = {
+  industry: "",
+  headquarters: "",
 };
 
 const defaultPartnerships: PartnershipsForm = {
@@ -490,6 +518,7 @@ const defaultOnboardingData: OnboardingData = {
   membershipPlans: defaultMembershipPlans,
   gymStats: defaultGymStats,
   // Brand fields (optional)
+  brandContactInfo: defaultBrandContactInfo,
   brandBusinessInfo: defaultBrandBusinessInfo,
   partnerships: defaultPartnerships,
 };
@@ -542,10 +571,9 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
       experiences,
       certifications,
       businessInfo,
-      membershipPlans,
-      gymStats,
+      brandContactInfo,
       brandBusinessInfo,
-      partnerships,
+      // partnerships, // TODO: Will be used for brand partnership validation later
     } = data;
 
     if (!category.category) return false;
@@ -609,26 +637,24 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
       }
 
       case "gym": {
-        const hasBusinessInfo = !!(
-          businessInfo?.address ||
-          businessInfo?.phone ||
-          businessInfo?.website
-        );
-        const hasMembershipPlans = (membershipPlans?.plans.length || 0) > 0;
-        const hasGymStats = !!(gymStats?.memberCount || gymStats?.trainerCount);
+        // Only require business info address as essential
+        const hasBusinessInfo = !!businessInfo?.address;
 
-        return hasBusinessInfo && hasMembershipPlans && hasGymStats;
+        return hasBusinessInfo;
       }
 
       case "brand": {
-        const hasBrandBusinessInfo = !!(
-          brandBusinessInfo?.industry ||
-          brandBusinessInfo?.website ||
-          brandBusinessInfo?.headquarters
+        const hasBrandContactInfo = !!(
+          brandContactInfo?.website ||
+          brandContactInfo?.contactInfo.phone ||
+          brandContactInfo?.contactInfo.email ||
+          brandContactInfo?.contactInfo.address
         );
-        const hasPartnerships = (partnerships?.partnerships.length || 0) > 0;
+        const hasBrandBusinessInfo = !!(
+          brandBusinessInfo?.industry || brandBusinessInfo?.headquarters
+        );
 
-        return hasBrandBusinessInfo && hasPartnerships;
+        return hasBrandContactInfo || hasBrandBusinessInfo;
       }
 
       default:
@@ -637,16 +663,28 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
   }, [data]);
 
   const submitToDatabase = useCallback(
-    async (overrideCertifications?: CertificationsForm): Promise<void> => {
+    async (
+      overrideCertifications?: CertificationsForm,
+      overrideGymStats?: GymStatsForm,
+      overridePartnerships?: PartnershipsForm
+    ): Promise<void> => {
       try {
         if (!userId) {
           throw new Error("User not authenticated");
         }
 
         // Use override certifications if provided, otherwise use context data
-        const dataToSubmit = overrideCertifications
+        let dataToSubmit = overrideCertifications
           ? { ...data, certifications: overrideCertifications }
           : data;
+
+        dataToSubmit = overrideGymStats
+          ? { ...dataToSubmit, gymStats: overrideGymStats }
+          : dataToSubmit;
+
+        dataToSubmit = overridePartnerships
+          ? { ...dataToSubmit, partnerships: overridePartnerships }
+          : dataToSubmit;
 
         console.log(
           "Submitting complete onboarding data to database:",
@@ -655,7 +693,16 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
 
         // Transform and filter data for Convex
         const transformedData = transformDataForConvex(dataToSubmit);
-        console.log("Transformed data for Convex:", transformedData);
+        console.log(
+          "🔥 Final transformed data being sent to Convex:",
+          transformedData
+        );
+        if ("gymStats" in transformedData) {
+          console.log(
+            "🔥 Specifically gymStats being sent:",
+            transformedData.gymStats
+          );
+        }
 
         // Submit to Convex database using completeOnboarding mutation
         const result = await completeOnboardingMutation({
@@ -677,21 +724,43 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
 
   // Gym-specific update functions
   const updateBusinessInfo = useCallback((businessInfo: BusinessInfoForm) => {
-    setData((prev) => ({ ...prev, businessInfo }));
+    console.log("🏋️‍♂️ Updating business info in context:", businessInfo);
+    setData((prev) => {
+      const updatedData = { ...prev, businessInfo };
+      console.log("🏋️‍♂️ Context updated with business info:", updatedData);
+      return updatedData;
+    });
   }, []);
 
   const updateMembershipPlans = useCallback(
     (membershipPlans: MembershipPlansForm) => {
-      setData((prev) => ({ ...prev, membershipPlans }));
+      console.log("💳 Updating membership plans in context:", membershipPlans);
+      setData((prev) => {
+        const updatedData = { ...prev, membershipPlans };
+        console.log("💳 Context updated with membership plans:", updatedData);
+        return updatedData;
+      });
     },
     []
   );
 
   const updateGymStats = useCallback((gymStats: GymStatsForm) => {
-    setData((prev) => ({ ...prev, gymStats }));
+    console.log("📊 Updating gym stats in context:", gymStats);
+    setData((prev) => {
+      const updatedData = { ...prev, gymStats };
+      console.log("📊 Context updated with gym stats:", updatedData);
+      return updatedData;
+    });
   }, []);
 
   // Brand-specific update functions
+  const updateBrandContactInfo = useCallback(
+    (brandContactInfo: BrandContactInfoForm) => {
+      setData((prev) => ({ ...prev, brandContactInfo }));
+    },
+    []
+  );
+
   const updateBrandBusinessInfo = useCallback(
     (brandBusinessInfo: BrandBusinessInfoForm) => {
       setData((prev) => ({ ...prev, brandBusinessInfo }));
@@ -713,6 +782,7 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
     updateBusinessInfo,
     updateMembershipPlans,
     updateGymStats,
+    updateBrandContactInfo,
     updateBrandBusinessInfo,
     updatePartnerships,
     resetData,

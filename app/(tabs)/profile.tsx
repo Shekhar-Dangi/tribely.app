@@ -5,9 +5,11 @@ import { Id } from "@/convex/_generated/dataModel";
 import { profile } from "@/constants/styles";
 import { COLORS } from "@/constants/theme";
 import DataTab from "@/components/profile/DataTab";
+import BrandDataTab from "@/components/profile/BrandDataTab";
+import GymDataTab from "@/components/profile/GymDataTab";
 import PostsTab from "@/components/posts/PostsTab";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { isIndividualProfile } from "@/types/schema";
+import { isIndividualProfile, isGymProfile, isBrandProfile } from "@/types/schema";
 
 export default function Profile() {
   const { user } = useUser();
@@ -28,30 +30,49 @@ export default function Profile() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "data":
+        // Individual Profile
+        if (userData?.profile && isIndividualProfile(userData.profile)) {
+          return (
+            <DataTab
+              bio={userData?.bio}
+              stats={userData.profile.stats}
+              experiences={userData.profile.experiences}
+              certifications={userData.profile.certifications}
+              affiliation={userData.profile.affiliation}
+            />
+          );
+        }
+        
+        // Gym Profile
+        if (userData?.profile && isGymProfile(userData.profile)) {
+          return (
+            <GymDataTab
+              bio={userData?.bio}
+              businessInfo={userData.profile.businessInfo}
+              membershipPlans={userData.profile.membershipPlans}
+              stats={userData.profile.stats}
+            />
+          );
+        }
+        
+        // Brand Profile
+        if (userData?.profile && isBrandProfile(userData.profile)) {
+          return (
+            <BrandDataTab
+              bio={userData?.bio}
+              businessInfo={userData.profile.businessInfo}
+              partnerships={userData.profile.partnerships}
+            />
+          );
+        }
+        
+        // Default case - no profile or unknown type
         return (
-          <DataTab
-            bio={userData?.bio}
-            stats={
-              userData?.profile && isIndividualProfile(userData.profile)
-                ? userData.profile.stats
-                : undefined
-            }
-            experiences={
-              userData?.profile && isIndividualProfile(userData.profile)
-                ? userData.profile.experiences
-                : undefined
-            }
-            certifications={
-              userData?.profile && isIndividualProfile(userData.profile)
-                ? userData.profile.certifications
-                : undefined
-            }
-            affiliation={
-              userData?.profile && isIndividualProfile(userData.profile)
-                ? userData.profile.affiliation
-                : undefined
-            }
-          />
+          <View style={profile.tabContent}>
+            <Text style={profile.contentPlaceholder}>
+              No profile data available yet
+            </Text>
+          </View>
         );
       case "posts":
         return userData?._id ? (

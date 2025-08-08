@@ -131,6 +131,7 @@ export default defineSchema({
           sunday: v.optional(v.string()),
         })
       ),
+      amenities: v.optional(v.array(v.string())),
     }),
 
     membershipPlans: v.optional(

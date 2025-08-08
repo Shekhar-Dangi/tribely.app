@@ -42,7 +42,7 @@ export default function Index() {
   const onSubmit = (formData: PersonalStatsForm) => {
     updatePersonalStats(formData);
     console.log("Personal Stats saved to context:", formData);
-    router.push("/(onboard)/category");
+    router.push("/(onboard)/experiences");
   };
 
   return (

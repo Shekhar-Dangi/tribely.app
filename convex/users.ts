@@ -175,6 +175,7 @@ export const completeOnboarding = mutation({
             sunday: v.optional(v.string()),
           })
         ),
+        amenities: v.optional(v.array(v.string())),
       })
     ),
     membershipPlans: v.optional(
@@ -267,6 +268,7 @@ export const completeOnboarding = mutation({
         updatedAt: Date.now(),
       });
     } else if (args.userType === "gym") {
+      console.log("Creating gym profile with stats:", args.gymStats);
       await ctx.db.insert("gyms", {
         userId: user._id,
         businessInfo: args.businessInfo || {
@@ -274,6 +276,7 @@ export const completeOnboarding = mutation({
           phone: undefined,
           website: undefined,
           operatingHours: undefined,
+          amenities: undefined,
         },
         membershipPlans: args.membershipPlans,
         stats: args.gymStats,
