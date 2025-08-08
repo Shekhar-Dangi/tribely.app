@@ -158,6 +158,72 @@ export const completeOnboarding = mutation({
     affiliation: v.optional(v.string()),
     isTrainingEnabled: v.optional(v.boolean()),
     trainingPrice: v.optional(v.number()),
+    // Gym-specific data
+    businessInfo: v.optional(
+      v.object({
+        address: v.optional(v.string()),
+        phone: v.optional(v.string()),
+        website: v.optional(v.string()),
+        operatingHours: v.optional(
+          v.object({
+            monday: v.optional(v.string()),
+            tuesday: v.optional(v.string()),
+            wednesday: v.optional(v.string()),
+            thursday: v.optional(v.string()),
+            friday: v.optional(v.string()),
+            saturday: v.optional(v.string()),
+            sunday: v.optional(v.string()),
+          })
+        ),
+      })
+    ),
+    membershipPlans: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          price: v.number(),
+          duration: v.string(),
+          features: v.array(v.string()),
+        })
+      )
+    ),
+    gymStats: v.optional(
+      v.object({
+        memberCount: v.number(),
+        trainerCount: v.number(),
+      })
+    ),
+    // Brand-specific data
+    brandBusinessInfo: v.optional(
+      v.object({
+        industry: v.optional(v.string()),
+        website: v.optional(v.string()),
+        headquarters: v.optional(v.string()),
+        contactInfo: v.optional(
+          v.object({
+            phone: v.optional(v.string()),
+            email: v.optional(v.string()),
+            address: v.optional(v.string()),
+          })
+        ),
+      })
+    ),
+    partnerships: v.optional(
+      v.array(
+        v.object({
+          partnerName: v.string(),
+          partnerType: v.union(
+            v.literal("gym"),
+            v.literal("individual"),
+            v.literal("brand")
+          ),
+          partnership_type: v.string(),
+          startDate: v.number(),
+          endDate: v.optional(v.number()),
+          isActive: v.boolean(),
+        })
+      )
+    ),
     // Common data
     socialLinks: v.optional(
       v.object({
@@ -201,36 +267,29 @@ export const completeOnboarding = mutation({
         updatedAt: Date.now(),
       });
     } else if (args.userType === "gym") {
-      // Create basic gym profile - can be enhanced later
       await ctx.db.insert("gyms", {
         userId: user._id,
-        businessInfo: {
+        businessInfo: args.businessInfo || {
           address: undefined,
           phone: undefined,
           website: undefined,
           operatingHours: undefined,
-          amenities: undefined,
         },
-        membershipPlans: undefined,
-        stats: undefined,
-        verification: undefined,
+        membershipPlans: args.membershipPlans,
+        stats: args.gymStats,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
     } else if (args.userType === "brand") {
-      // Create basic brand profile - can be enhanced later
       await ctx.db.insert("brands", {
         userId: user._id,
-        businessInfo: {
-          companySize: undefined,
+        businessInfo: args.brandBusinessInfo || {
           industry: undefined,
           website: undefined,
           headquarters: undefined,
           contactInfo: undefined,
         },
-        partnerships: undefined,
-        campaigns: undefined,
-        verification: undefined,
+        partnerships: args.partnerships,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
@@ -370,7 +429,7 @@ export const searchUsers = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const limit = args.limit || 20;
+    const limit = args.limit || 10;
 
     let usersQuery = ctx.db.query("users");
 

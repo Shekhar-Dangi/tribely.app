@@ -20,7 +20,6 @@ export const createGymProfile = mutation({
           sunday: v.optional(v.string()),
         })
       ),
-      amenities: v.optional(v.array(v.string())),
     }),
     membershipPlans: v.optional(
       v.array(
@@ -37,14 +36,6 @@ export const createGymProfile = mutation({
         memberCount: v.number(),
         trainerCount: v.number(),
         equipmentCount: v.optional(v.number()),
-      })
-    ),
-    verification: v.optional(
-      v.object({
-        businessLicense: v.optional(v.string()),
-        taxId: v.optional(v.string()),
-        isVerified: v.boolean(),
-        verificationDate: v.optional(v.number()),
       })
     ),
   },
@@ -72,7 +63,6 @@ export const createGymProfile = mutation({
       businessInfo: profileData.businessInfo,
       membershipPlans: profileData.membershipPlans,
       stats: profileData.stats,
-      verification: profileData.verification,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -118,15 +108,6 @@ export const updateGymProfile = mutation({
       v.object({
         memberCount: v.number(),
         trainerCount: v.number(),
-        equipmentCount: v.optional(v.number()),
-      })
-    ),
-    verification: v.optional(
-      v.object({
-        businessLicense: v.optional(v.string()),
-        taxId: v.optional(v.string()),
-        isVerified: v.boolean(),
-        verificationDate: v.optional(v.number()),
       })
     ),
   },
@@ -237,41 +218,5 @@ export const getAllGyms = query({
     );
 
     return results.filter((result) => result.user !== null);
-  },
-});
-
-// Update gym verification status
-export const updateGymVerification = mutation({
-  args: {
-    userId: v.id("users"),
-    isVerified: v.boolean(),
-    businessLicense: v.optional(v.string()),
-    taxId: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const profile = await ctx.db
-      .query("gyms")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .first();
-
-    if (!profile) {
-      throw new Error("Gym profile not found");
-    }
-
-    const verification = {
-      ...profile.verification,
-      isVerified: args.isVerified,
-      verificationDate: args.isVerified ? Date.now() : undefined,
-      businessLicense:
-        args.businessLicense || profile.verification?.businessLicense,
-      taxId: args.taxId || profile.verification?.taxId,
-    };
-
-    await ctx.db.patch(profile._id, {
-      verification,
-      updatedAt: Date.now(),
-    });
-
-    return { success: true };
   },
 });

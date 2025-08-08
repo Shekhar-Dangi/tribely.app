@@ -6,15 +6,6 @@ export const createBrandProfile = mutation({
   args: {
     userId: v.id("users"),
     businessInfo: v.object({
-      companySize: v.optional(
-        v.union(
-          v.literal("1-10"),
-          v.literal("11-50"),
-          v.literal("51-200"),
-          v.literal("201-500"),
-          v.literal("501+")
-        )
-      ),
       industry: v.optional(v.string()),
       website: v.optional(v.string()),
       headquarters: v.optional(v.string()),
@@ -42,26 +33,6 @@ export const createBrandProfile = mutation({
         })
       )
     ),
-    campaigns: v.optional(
-      v.array(
-        v.object({
-          title: v.string(),
-          description: v.optional(v.string()),
-          targetAudience: v.optional(v.string()),
-          startDate: v.number(),
-          endDate: v.optional(v.number()),
-          isActive: v.boolean(),
-        })
-      )
-    ),
-    verification: v.optional(
-      v.object({
-        businessRegistration: v.optional(v.string()),
-        taxId: v.optional(v.string()),
-        isVerified: v.boolean(),
-        verificationDate: v.optional(v.number()),
-      })
-    ),
   },
   handler: async (ctx, args) => {
     const { userId, ...profileData } = args;
@@ -86,8 +57,6 @@ export const createBrandProfile = mutation({
       userId,
       businessInfo: profileData.businessInfo,
       partnerships: profileData.partnerships,
-      campaigns: profileData.campaigns,
-      verification: profileData.verification,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -102,15 +71,6 @@ export const updateBrandProfile = mutation({
     userId: v.id("users"),
     businessInfo: v.optional(
       v.object({
-        companySize: v.optional(
-          v.union(
-            v.literal("1-10"),
-            v.literal("11-50"),
-            v.literal("51-200"),
-            v.literal("201-500"),
-            v.literal("501+")
-          )
-        ),
         industry: v.optional(v.string()),
         website: v.optional(v.string()),
         headquarters: v.optional(v.string()),
@@ -138,26 +98,6 @@ export const updateBrandProfile = mutation({
           isActive: v.boolean(),
         })
       )
-    ),
-    campaigns: v.optional(
-      v.array(
-        v.object({
-          title: v.string(),
-          description: v.optional(v.string()),
-          targetAudience: v.optional(v.string()),
-          startDate: v.number(),
-          endDate: v.optional(v.number()),
-          isActive: v.boolean(),
-        })
-      )
-    ),
-    verification: v.optional(
-      v.object({
-        businessRegistration: v.optional(v.string()),
-        taxId: v.optional(v.string()),
-        isVerified: v.boolean(),
-        verificationDate: v.optional(v.number()),
-      })
     ),
   },
   handler: async (ctx, args) => {
@@ -221,43 +161,6 @@ export const getBrandsByIndustry = query({
     } else {
       brands = await ctx.db.query("brands").take(limit);
     }
-
-    // Get the corresponding user data
-    const results = await Promise.all(
-      brands.map(async (brand) => {
-        const user = await ctx.db.get(brand.userId);
-        return {
-          ...brand,
-          user,
-        };
-      })
-    );
-
-    return results.filter((result) => result.user !== null);
-  },
-});
-
-// Get brands by company size
-export const getBrandsBySize = query({
-  args: {
-    companySize: v.union(
-      v.literal("1-10"),
-      v.literal("11-50"),
-      v.literal("51-200"),
-      v.literal("201-500"),
-      v.literal("501+")
-    ),
-    limit: v.optional(v.number()),
-  },
-  handler: async (ctx, args) => {
-    const limit = args.limit || 10;
-
-    const brands = await ctx.db
-      .query("brands")
-      .withIndex("by_company_size", (q) =>
-        q.eq("businessInfo.companySize", args.companySize)
-      )
-      .take(limit);
 
     // Get the corresponding user data
     const results = await Promise.all(
@@ -347,77 +250,3 @@ export const addPartnership = mutation({
 });
 
 // Add campaign
-export const addCampaign = mutation({
-  args: {
-    userId: v.id("users"),
-    title: v.string(),
-    description: v.optional(v.string()),
-    targetAudience: v.optional(v.string()),
-    startDate: v.number(),
-    endDate: v.optional(v.number()),
-  },
-  handler: async (ctx, args) => {
-    const profile = await ctx.db
-      .query("brands")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .first();
-
-    if (!profile) {
-      throw new Error("Brand profile not found");
-    }
-
-    const newCampaign = {
-      title: args.title,
-      description: args.description,
-      targetAudience: args.targetAudience,
-      startDate: args.startDate,
-      endDate: args.endDate,
-      isActive: true,
-    };
-
-    const updatedCampaigns = [...(profile.campaigns || []), newCampaign];
-
-    await ctx.db.patch(profile._id, {
-      campaigns: updatedCampaigns,
-      updatedAt: Date.now(),
-    });
-
-    return { success: true };
-  },
-});
-
-// Update brand verification status
-export const updateBrandVerification = mutation({
-  args: {
-    userId: v.id("users"),
-    isVerified: v.boolean(),
-    businessRegistration: v.optional(v.string()),
-    taxId: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const profile = await ctx.db
-      .query("brands")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .first();
-
-    if (!profile) {
-      throw new Error("Brand profile not found");
-    }
-
-    const verification = {
-      ...profile.verification,
-      isVerified: args.isVerified,
-      verificationDate: args.isVerified ? Date.now() : undefined,
-      businessRegistration:
-        args.businessRegistration || profile.verification?.businessRegistration,
-      taxId: args.taxId || profile.verification?.taxId,
-    };
-
-    await ctx.db.patch(profile._id, {
-      verification,
-      updatedAt: Date.now(),
-    });
-
-    return { success: true };
-  },
-});

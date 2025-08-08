@@ -50,7 +50,6 @@ export default defineSchema({
   individuals: defineTable({
     userId: v.id("users"), // references users._id
 
-    // Personal Stats
     stats: v.optional(
       v.object({
         height: v.number(), // in cm
@@ -62,7 +61,6 @@ export default defineSchema({
               exerciseName: v.string(), // "Bench Press", "5K Run", "Triceps Pushdown", etc.
               subtitle: v.string(),
               date: v.number(), // when this PR was achieved
-              imageUrl: v.optional(v.string()), // proof image for the PR
             })
           )
         ),
@@ -100,11 +98,10 @@ export default defineSchema({
     ),
 
     // Affiliation & Training
-    affiliation: v.optional(v.string()), // gym or brand name
+    affiliation: v.optional(v.string()),
     isTrainingEnabled: v.boolean(),
-    trainingPrice: v.optional(v.number()), // null means free
+    trainingPrice: v.optional(v.number()),
 
-    // Activity Score for Leaderboard (calculated field)
     activityScore: v.number(),
     lastActivityUpdate: v.number(),
 
@@ -116,11 +113,9 @@ export default defineSchema({
     .index("by_training_enabled", ["isTrainingEnabled"])
     .index("by_affiliation", ["affiliation"]),
 
-  // ──────── GYMS (Business Data) ────────
   gyms: defineTable({
-    userId: v.id("users"), // references users._id
+    userId: v.id("users"),
 
-    // Business Information
     businessInfo: v.object({
       address: v.optional(v.string()),
       phone: v.optional(v.string()),
@@ -136,10 +131,8 @@ export default defineSchema({
           sunday: v.optional(v.string()),
         })
       ),
-      amenities: v.optional(v.array(v.string())), // Updated from array of strings to array of objects
     }),
 
-    // Membership & Pricing
     membershipPlans: v.optional(
       v.array(
         v.object({
@@ -147,27 +140,14 @@ export default defineSchema({
           price: v.number(),
           duration: v.string(), // "monthly", "yearly"
           features: v.array(v.string()),
-          imageUrl: v.optional(v.string()), // visual representation of the plan
         })
       )
     ),
 
-    // Statistics
     stats: v.optional(
       v.object({
         memberCount: v.number(),
         trainerCount: v.number(),
-        equipmentCount: v.optional(v.number()),
-      })
-    ),
-
-    // Verification & Legal
-    verification: v.optional(
-      v.object({
-        businessLicense: v.optional(v.string()),
-        taxId: v.optional(v.string()),
-        isVerified: v.boolean(),
-        verificationDate: v.optional(v.number()),
       })
     ),
 
@@ -183,15 +163,6 @@ export default defineSchema({
 
     // Business Information
     businessInfo: v.object({
-      companySize: v.optional(
-        v.union(
-          v.literal("1-10"),
-          v.literal("11-50"),
-          v.literal("51-200"),
-          v.literal("201-500"),
-          v.literal("501+")
-        )
-      ),
       industry: v.optional(v.string()), // "Fitness Equipment", "Supplements", "Apparel", etc.
       website: v.optional(v.string()),
       headquarters: v.optional(v.string()),
@@ -218,42 +189,15 @@ export default defineSchema({
           startDate: v.number(),
           endDate: v.optional(v.number()),
           isActive: v.boolean(),
-          imageUrl: v.optional(v.string()), // partnership photo or logo
         })
       )
-    ),
-
-    // Marketing Campaigns
-    campaigns: v.optional(
-      v.array(
-        v.object({
-          title: v.string(),
-          description: v.optional(v.string()),
-          targetAudience: v.optional(v.string()),
-          startDate: v.number(),
-          endDate: v.optional(v.number()),
-          isActive: v.boolean(),
-          imageUrl: v.optional(v.string()), // campaign visual or banner
-        })
-      )
-    ),
-
-    // Verification & Legal
-    verification: v.optional(
-      v.object({
-        businessRegistration: v.optional(v.string()),
-        taxId: v.optional(v.string()),
-        isVerified: v.boolean(),
-        verificationDate: v.optional(v.number()),
-      })
     ),
 
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
-    .index("by_industry", ["businessInfo.industry"])
-    .index("by_company_size", ["businessInfo.companySize"]),
+    .index("by_industry", ["businessInfo.industry"]),
 
   // ──────── POSTS ────────
   posts: defineTable({
@@ -599,23 +543,6 @@ export default defineSchema({
     .index("by_user", ["userId", "createdAt"])
     .index("by_unread", ["userId", "isRead"])
     .index("by_type", ["type"]),
-
-  // ──────── FILE UPLOADS ────────
-  fileUploads: defineTable({
-    userId: v.id("users"),
-    fileName: v.string(),
-    fileUrl: v.string(),
-    storageId: v.optional(v.string()), // Convex storage ID for file management
-    fileType: v.union(v.literal("image"), v.literal("video")),
-    fileSize: v.optional(v.number()), // in bytes
-    category: v.string(), // "personalRecord", "experience", "certification", "amenity", "campaign", "partnership", etc.
-    relatedId: v.optional(v.string()), // ID of the related record if applicable
-    uploadedAt: v.number(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_category", ["category"])
-    .index("by_type", ["fileType"])
-    .index("by_user_and_category", ["userId", "category"]),
 
   // ──────── SYSTEM TABLES ────────
   appConfig: defineTable({
