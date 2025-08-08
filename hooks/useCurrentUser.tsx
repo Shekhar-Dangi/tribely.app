@@ -1,4 +1,4 @@
-import { api } from "@/convex/_generated/api";
+import { api } from "../convex/_generated/api";
 import { useUser } from "@clerk/clerk-expo";
 import { useQuery } from "convex/react";
 

@@ -16,7 +16,6 @@ import type {
 import type * as brands from "../brands.js";
 import type * as cloudinary from "../cloudinary.js";
 import type * as cloudinaryActions from "../cloudinaryActions.js";
-import type * as fileUploads from "../fileUploads.js";
 import type * as gyms from "../gyms.js";
 import type * as http from "../http.js";
 import type * as individuals from "../individuals.js";
@@ -35,7 +34,6 @@ declare const fullApi: ApiFromModules<{
   brands: typeof brands;
   cloudinary: typeof cloudinary;
   cloudinaryActions: typeof cloudinaryActions;
-  fileUploads: typeof fileUploads;
   gyms: typeof gyms;
   http: typeof http;
   individuals: typeof individuals;
