@@ -473,3 +473,134 @@ export const profile = StyleSheet.create({
     borderBottomColor: "transparent",
   },
 });
+
+export const editProfile = StyleSheet.create({
+  // Header styles
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: {
+    fontSize: FONTS.sizes.lg,
+    ...FONTS.bold,
+    color: COLORS.text,
+  },
+  saveButton: {
+    backgroundColor: COLORS.secondary,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.sm,
+    minWidth: 60,
+    alignItems: "center",
+  },
+  saveButtonDisabled: {
+    backgroundColor: COLORS.lightGray,
+  },
+  saveButtonText: {
+    color: COLORS.white,
+    fontSize: FONTS.sizes.sm,
+    ...FONTS.medium,
+  },
+  saveButtonTextDisabled: {
+    color: COLORS.textMuted,
+  },
+
+  // Avatar section styles
+  avatarSection: {
+    alignItems: "center",
+    paddingVertical: SPACING.lg,
+  },
+  avatarContainer: {
+    position: "relative",
+    marginBottom: SPACING.sm,
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: COLORS.secondary,
+  },
+  avatarOverlay: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: COLORS.secondary,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: COLORS.white,
+  },
+  avatarHint: {
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+  },
+
+  // Form field styles
+  readOnlyInput: {
+    backgroundColor: COLORS.lightGray,
+    justifyContent: "center",
+  },
+  readOnlyText: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.sizes.md,
+  },
+  helpText: {
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    marginTop: SPACING.xs,
+  },
+  bioInput: {
+    height: 80,
+    textAlignVertical: "top",
+    paddingTop: SPACING.sm,
+  },
+  characterCount: {
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    textAlign: "right",
+    marginTop: SPACING.xs,
+  },
+
+  // Social media input styles
+  socialInputHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  socialInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  socialPrefix: {
+    position: "absolute",
+    left: SPACING.sm,
+    fontSize: FONTS.sizes.md,
+    color: COLORS.textSecondary,
+    zIndex: 1,
+  },
+  socialInput: {
+    paddingLeft: 24,
+  },
+  errorText: {
+    color: COLORS.error,
+    fontSize: FONTS.sizes.xs,
+    marginTop: SPACING.xs,
+  },
+});

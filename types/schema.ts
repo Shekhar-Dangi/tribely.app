@@ -1,4 +1,6 @@
 // Base User type (matches Convex schema)
+export type UserType = "individual" | "gym" | "brand";
+
 export interface User {
   _id: string;
   _creationTime: number;
@@ -7,7 +9,16 @@ export interface User {
   email: string;
   bio?: string;
   avatarUrl?: string;
-  userType: "individual" | "gym" | "brand";
+  userType: UserType;
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+  };
   socialLinks?: {
     instagram?: string;
     youtube?: string;
@@ -27,7 +38,7 @@ export interface IndividualProfile {
   _id: string;
   _creationTime: number;
   userId: string;
-  stats?: {
+  stats: {
     height: number;
     weight: number;
     bodyFat?: number;

@@ -26,13 +26,13 @@ export const createUser = mutation({
         args.name.toLowerCase().replace(/\s+/g, "") || `user_${Date.now()}`,
       bio: undefined,
       avatarUrl: args.avatarUrl,
-      userType: "individual", // default type, will be updated during onboarding
+      userType: "individual",
       socialLinks: undefined,
       isVerified: false,
       isPremium: false,
       followerCount: 0,
       followingCount: 0,
-      onBoardingStatus: false, // User needs to complete onboarding
+      onBoardingStatus: false,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -112,22 +112,20 @@ export const completeOnboarding = mutation({
       v.literal("brand")
     ),
     // Individual-specific data
-    stats: v.optional(
-      v.object({
-        height: v.number(),
-        weight: v.number(),
-        bodyFat: v.optional(v.number()),
-        personalRecords: v.optional(
-          v.array(
-            v.object({
-              exerciseName: v.string(),
-              subtitle: v.string(),
-              date: v.number(),
-            })
-          )
-        ),
-      })
-    ),
+    stats: v.object({
+      height: v.number(),
+      weight: v.number(),
+      bodyFat: v.optional(v.number()),
+      personalRecords: v.optional(
+        v.array(
+          v.object({
+            exerciseName: v.string(),
+            subtitle: v.string(),
+            date: v.number(),
+          })
+        )
+      ),
+    }),
     experiences: v.optional(
       v.array(
         v.object({
@@ -422,6 +420,32 @@ export const updateUser = mutation({
   },
 });
 
+// Update user location
+export const updateUserLocation = mutation({
+  args: {
+    userId: v.id("users"),
+    location: v.object({
+      city: v.optional(v.string()),
+      state: v.optional(v.string()),
+      country: v.optional(v.string()),
+      coordinates: v.optional(
+        v.object({
+          latitude: v.number(),
+          longitude: v.number(),
+        })
+      ),
+    }),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, {
+      location: args.location,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
 // Search users by username
 export const searchUsers = query({
   args: {
@@ -554,5 +578,109 @@ export const getTrendingUsers = query({
     return usersWithProfiles
       .sort((a, b) => b.followerCount - a.followerCount)
       .slice(0, limit);
+  },
+});
+
+// Update brand profile data
+export const updateBrandProfile = mutation({
+  args: {
+    userId: v.id("users"),
+    businessInfo: v.optional(
+      v.object({
+        companySize: v.optional(
+          v.union(
+            v.literal("1-10"),
+            v.literal("11-50"),
+            v.literal("51-200"),
+            v.literal("201-500"),
+            v.literal("501+")
+          )
+        ),
+        industry: v.optional(v.string()),
+        website: v.optional(v.string()),
+        headquarters: v.optional(v.string()),
+        contactInfo: v.optional(
+          v.object({
+            phone: v.optional(v.string()),
+            email: v.optional(v.string()),
+            address: v.optional(v.string()),
+          })
+        ),
+      })
+    ),
+    partnerships: v.optional(
+      v.array(
+        v.object({
+          partnerName: v.string(),
+          partnerType: v.union(
+            v.literal("gym"),
+            v.literal("individual"),
+            v.literal("brand")
+          ),
+          partnership_type: v.string(),
+          startDate: v.number(),
+          endDate: v.optional(v.number()),
+          isActive: v.boolean(),
+        })
+      )
+    ),
+    campaigns: v.optional(
+      v.array(
+        v.object({
+          title: v.string(),
+          description: v.optional(v.string()),
+          targetAudience: v.optional(v.string()),
+          startDate: v.number(),
+          endDate: v.optional(v.number()),
+          isActive: v.boolean(),
+        })
+      )
+    ),
+    verification: v.optional(
+      v.object({
+        businessRegistration: v.optional(v.string()),
+        taxId: v.optional(v.string()),
+        isVerified: v.optional(v.boolean()),
+        verificationDate: v.optional(v.number()),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const { userId, ...updates } = args;
+
+    // Find the brand profile
+    const brandProfile = await ctx.db
+      .query("brands")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!brandProfile) {
+      // Create profile if it doesn't exist
+      const profileData: any = {
+        userId,
+        businessInfo: updates.businessInfo || {},
+        partnerships: updates.partnerships || [],
+        campaigns: updates.campaigns || [],
+        verification: updates.verification || { isVerified: false },
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+
+      await ctx.db.insert("brands", profileData);
+    } else {
+      // Update existing profile
+      const cleanUpdates = Object.fromEntries(
+        Object.entries(updates).filter(([_, value]) => value !== undefined)
+      );
+
+      if (Object.keys(cleanUpdates).length > 0) {
+        await ctx.db.patch(brandProfile._id, {
+          ...cleanUpdates,
+          updatedAt: Date.now(),
+        });
+      }
+    }
+
+    return { success: true };
   },
 });

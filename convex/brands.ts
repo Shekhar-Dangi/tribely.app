@@ -248,5 +248,3 @@ export const addPartnership = mutation({
     return { success: true };
   },
 });
-
-// Add campaign

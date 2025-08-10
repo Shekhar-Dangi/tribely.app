@@ -17,6 +17,21 @@ export default defineSchema({
       v.literal("brand")
     ),
 
+    // Location information
+    location: v.optional(
+      v.object({
+        city: v.optional(v.string()),
+        state: v.optional(v.string()),
+        country: v.optional(v.string()),
+        coordinates: v.optional(
+          v.object({
+            latitude: v.number(),
+            longitude: v.number(),
+          })
+        ),
+      })
+    ),
+
     // Social Links
     socialLinks: v.optional(
       v.object({
@@ -39,33 +54,38 @@ export default defineSchema({
     .index("by_clerk_id", ["clerkId"])
     .index("by_username", ["username"])
     .index("by_user_type", ["userType"])
+    .index("by_location_city", ["location.city"])
+    .index("by_location_state", ["location.state"])
     .index("by_follower_count", ["followerCount"])
     .index("by_premium_status", ["isPremium"])
     .searchIndex("search_users", {
       searchField: "username",
-      filterFields: ["userType", "isPremium", "isVerified"],
+      filterFields: [
+        "userType",
+        "isPremium",
+        "isVerified",
+        "location.city",
+        "location.state",
+      ],
     }),
 
   // ──────── INDIVIDUAL USERS (Personal Fitness Data) ────────
   individuals: defineTable({
     userId: v.id("users"), // references users._id
-
-    stats: v.optional(
-      v.object({
-        height: v.number(), // in cm
-        weight: v.number(), // in kg
-        bodyFat: v.optional(v.number()), // percentage
-        personalRecords: v.optional(
-          v.array(
-            v.object({
-              exerciseName: v.string(), // "Bench Press", "5K Run", "Triceps Pushdown", etc.
-              subtitle: v.string(),
-              date: v.number(), // when this PR was achieved
-            })
-          )
-        ),
-      })
-    ),
+    stats: v.object({
+      height: v.number(), // in cm
+      weight: v.number(), // in kg
+      bodyFat: v.optional(v.number()), // percentage
+      personalRecords: v.optional(
+        v.array(
+          v.object({
+            exerciseName: v.string(), // "Bench Press", "5K Run", "Triceps Pushdown", etc.
+            subtitle: v.string(),
+            date: v.number(), // when this PR was achieved
+          })
+        )
+      ),
+    }),
 
     // Professional Info & Life Experiences
     experiences: v.optional(
@@ -149,6 +169,14 @@ export default defineSchema({
       v.object({
         memberCount: v.number(),
         trainerCount: v.number(),
+      })
+    ),
+    verification: v.optional(
+      v.object({
+        isVerified: v.optional(v.boolean()),
+        businessLicense: v.optional(v.string()),
+        taxId: v.optional(v.string()),
+        verificationDate: v.optional(v.number()),
       })
     ),
 

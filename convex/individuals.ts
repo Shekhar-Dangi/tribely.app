@@ -5,22 +5,20 @@ import { v } from "convex/values";
 export const createIndividualProfile = mutation({
   args: {
     userId: v.id("users"),
-    stats: v.optional(
-      v.object({
-        height: v.number(),
-        weight: v.number(),
-        bodyFat: v.optional(v.number()),
-        personalRecords: v.optional(
-          v.array(
-            v.object({
-              exerciseName: v.string(),
-              subtitle: v.string(),
-              date: v.number(),
-            })
-          )
-        ),
-      })
-    ),
+    stats: v.object({
+      height: v.number(),
+      weight: v.number(),
+      bodyFat: v.optional(v.number()),
+      personalRecords: v.optional(
+        v.array(
+          v.object({
+            exerciseName: v.string(),
+            subtitle: v.string(),
+            date: v.number(),
+          })
+        )
+      ),
+    }),
     experiences: v.optional(
       v.array(
         v.object({
@@ -93,22 +91,20 @@ export const createIndividualProfile = mutation({
 export const updateIndividualProfile = mutation({
   args: {
     userId: v.id("users"),
-    stats: v.optional(
-      v.object({
-        height: v.number(),
-        weight: v.number(),
-        bodyFat: v.optional(v.number()),
-        personalRecords: v.optional(
-          v.array(
-            v.object({
-              exerciseName: v.string(),
-              subtitle: v.string(),
-              date: v.number(),
-            })
-          )
-        ),
-      })
-    ),
+    stats: v.object({
+      height: v.number(),
+      weight: v.number(),
+      bodyFat: v.optional(v.number()),
+      personalRecords: v.optional(
+        v.array(
+          v.object({
+            exerciseName: v.string(),
+            subtitle: v.string(),
+            date: v.number(),
+          })
+        )
+      ),
+    }),
     experiences: v.optional(
       v.array(
         v.object({

@@ -1,10 +1,6 @@
 import { View, Text, ScrollView } from "react-native";
 import { profile } from "@/constants/styles";
-import {
-  Ionicons,
-  MaterialIcons,
-  FontAwesome5,
-} from "@expo/vector-icons";
+import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { COLORS } from "@/constants/theme";
 
 interface BusinessInfo {
@@ -46,7 +42,7 @@ interface GymDataTabProps {
 const getDayLabel = (day: string): string => {
   const labels: { [key: string]: string } = {
     monday: "Mon",
-    tuesday: "Tue", 
+    tuesday: "Tue",
     wednesday: "Wed",
     thursday: "Thu",
     friday: "Fri",
@@ -117,7 +113,11 @@ export default function GymDataTab({
                   marginRight: 12,
                 }}
               >
-                <MaterialIcons name="location-on" size={20} color={COLORS.error} />
+                <MaterialIcons
+                  name="location-on"
+                  size={20}
+                  color={COLORS.error}
+                />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={profile.dataCardTitle}>Address</Text>
@@ -190,22 +190,23 @@ export default function GymDataTab({
           {businessInfo.operatingHours && (
             <View style={profile.dataCard}>
               <Text style={profile.dataCardTitle}>Operating Hours</Text>
-              {Object.entries(businessInfo.operatingHours).map(([day, hours]) => 
-                hours ? (
-                  <View
-                    key={day}
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      marginVertical: 4,
-                    }}
-                  >
-                    <Text style={profile.dataCardSubtitle}>
-                      {getDayLabel(day)}
-                    </Text>
-                    <Text style={profile.dataCardDescription}>{hours}</Text>
-                  </View>
-                ) : null
+              {Object.entries(businessInfo.operatingHours).map(
+                ([day, hours]) =>
+                  hours ? (
+                    <View
+                      key={day}
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        marginVertical: 4,
+                      }}
+                    >
+                      <Text style={profile.dataCardSubtitle}>
+                        {getDayLabel(day)}
+                      </Text>
+                      <Text style={profile.dataCardDescription}>{hours}</Text>
+                    </View>
+                  ) : null
               )}
             </View>
           )}
@@ -265,7 +266,11 @@ export default function GymDataTab({
                   marginRight: 12,
                 }}
               >
-                <MaterialIcons name="card-membership" size={20} color={COLORS.premium} />
+                <MaterialIcons
+                  name="card-membership"
+                  size={20}
+                  color={COLORS.premium}
+                />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={profile.dataCardTitle}>{plan.name}</Text>

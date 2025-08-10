@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useUser } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 import { Id } from "@/convex/_generated/dataModel";
 import { profile } from "@/constants/styles";
 import { COLORS } from "@/constants/theme";
@@ -9,17 +10,21 @@ import BrandDataTab from "@/components/profile/BrandDataTab";
 import GymDataTab from "@/components/profile/GymDataTab";
 import PostsTab from "@/components/posts/PostsTab";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { isIndividualProfile, isGymProfile, isBrandProfile } from "@/types/schema";
+import {
+  isIndividualProfile,
+  isGymProfile,
+  isBrandProfile,
+} from "@/types/schema";
 
 export default function Profile() {
   const { user } = useUser();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("data");
 
   const userData = useCurrentUser();
 
   const handleEdit = () => {
-    // Navigate to edit profile
-    console.log("Edit profile");
+    router.push("/edit-profile");
   };
 
   const handleSettings = () => {
@@ -42,7 +47,7 @@ export default function Profile() {
             />
           );
         }
-        
+
         // Gym Profile
         if (userData?.profile && isGymProfile(userData.profile)) {
           return (
@@ -54,7 +59,7 @@ export default function Profile() {
             />
           );
         }
-        
+
         // Brand Profile
         if (userData?.profile && isBrandProfile(userData.profile)) {
           return (
@@ -65,7 +70,7 @@ export default function Profile() {
             />
           );
         }
-        
+
         // Default case - no profile or unknown type
         return (
           <View style={profile.tabContent}>

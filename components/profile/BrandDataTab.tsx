@@ -1,9 +1,6 @@
 import { View, Text, ScrollView } from "react-native";
 import { profile } from "@/constants/styles";
-import {
-  Ionicons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { COLORS } from "@/constants/theme";
 
 interface BusinessInfo {
@@ -42,10 +39,14 @@ const formatDate = (timestamp: number): string => {
 
 const getPartnerTypeIcon = (type: string) => {
   switch (type) {
-    case "gym": return "fitness";
-    case "individual": return "person";
-    case "brand": return "business";
-    default: return "help";
+    case "gym":
+      return "fitness";
+    case "individual":
+      return "person";
+    case "brand":
+      return "business";
+    default:
+      return "help";
   }
 };
 
@@ -69,7 +70,7 @@ export default function BrandDataTab({
       {businessInfo && (
         <View style={profile.statsContainer}>
           <Text style={profile.sectionHeader}>Business Information</Text>
-          
+
           {businessInfo.industry && (
             <View style={profile.statsRow}>
               <View style={profile.statItem}>
@@ -78,7 +79,9 @@ export default function BrandDataTab({
               </View>
               {businessInfo.companySize && (
                 <View style={profile.statItem}>
-                  <Text style={profile.statValue}>{businessInfo.companySize}</Text>
+                  <Text style={profile.statValue}>
+                    {businessInfo.companySize}
+                  </Text>
                   <Text style={profile.statLabel}>Company Size</Text>
                 </View>
               )}
@@ -221,7 +224,11 @@ export default function BrandDataTab({
                       marginRight: 12,
                     }}
                   >
-                    <MaterialIcons name="location-on" size={20} color={COLORS.error} />
+                    <MaterialIcons
+                      name="location-on"
+                      size={20}
+                      color={COLORS.error}
+                    />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={profile.dataCardTitle}>Address</Text>
@@ -259,14 +266,16 @@ export default function BrandDataTab({
                   marginRight: 12,
                 }}
               >
-                <Ionicons 
-                  name={getPartnerTypeIcon(partnership.partnerType)} 
-                  size={20} 
-                  color={COLORS.secondary} 
+                <Ionicons
+                  name={getPartnerTypeIcon(partnership.partnerType)}
+                  size={20}
+                  color={COLORS.secondary}
                 />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={profile.dataCardTitle}>{partnership.partnerName}</Text>
+                <Text style={profile.dataCardTitle}>
+                  {partnership.partnerName}
+                </Text>
                 <Text style={profile.dataCardSubtitle}>
                   {partnership.partnership_type} • {partnership.partnerType}
                 </Text>
