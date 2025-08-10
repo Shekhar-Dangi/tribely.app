@@ -166,7 +166,7 @@ export default function BrandDataTab({
                       marginRight: 12,
                     }}
                   >
-                    <Ionicons name="call" size={20} color={COLORS.success} />
+                    <Ionicons name="call" size={20} color={COLORS.primary} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={profile.dataCardTitle}>Phone</Text>
@@ -195,7 +195,7 @@ export default function BrandDataTab({
                       marginRight: 12,
                     }}
                   >
-                    <Ionicons name="mail" size={20} color={COLORS.warning} />
+                    <Ionicons name="mail" size={20} color={COLORS.primary} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={profile.dataCardTitle}>Email</Text>
@@ -227,7 +227,7 @@ export default function BrandDataTab({
                     <MaterialIcons
                       name="location-on"
                       size={20}
-                      color={COLORS.error}
+                      color={COLORS.primary}
                     />
                   </View>
                   <View style={{ flex: 1 }}>

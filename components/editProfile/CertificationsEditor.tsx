@@ -42,7 +42,7 @@ export default function CertificationsEditor({
   };
 
   return (
-    <View style={onboard.card}>
+    <View style={onboard.wideCard}>
       <Text style={onboard.cardTitle}>Certifications</Text>
 
       {fields.length === 0 && (
@@ -52,15 +52,12 @@ export default function CertificationsEditor({
       )}
 
       {fields.map((field, index) => (
-        <View
-          key={field.id}
-          style={[onboard.card, { marginBottom: 16, position: "relative" }]}
-        >
+        <View key={field.id} style={{ marginBottom: 16, position: "relative" }}>
           <TouchableOpacity
             style={union.removeButton}
             onPress={() => removeCertification(index)}
           >
-            <Ionicons name="close" size={16} color={COLORS.error} />
+            <Ionicons name="close-circle" size={20} color={COLORS.secondary} />
           </TouchableOpacity>
 
           <View style={union.textInputContainer}>

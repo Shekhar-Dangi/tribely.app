@@ -34,7 +34,7 @@ export default function MembershipPlansEditor({
   };
 
   return (
-    <View style={onboard.card}>
+    <View style={onboard.wideCard}>
       <Text style={onboard.cardTitle}>Membership Plans</Text>
       <Text style={editProfile.helpText}>
         Create membership plans for your gym
@@ -87,7 +87,7 @@ function MembershipPlanCard({
   };
 
   return (
-    <View style={[onboard.card, { marginBottom: 16, position: "relative" }]}>
+    <View style={[{ marginBottom: 16, position: "relative" }]}>
       {canRemove && (
         <TouchableOpacity style={union.removeButton} onPress={onRemove}>
           <Ionicons name="close-circle" size={24} color={COLORS.error} />

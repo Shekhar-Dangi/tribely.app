@@ -36,7 +36,7 @@ export default function CampaignsEditor({
   };
 
   return (
-    <View style={onboard.card}>
+    <View style={onboard.wideCard}>
       <Text style={onboard.cardTitle}>Marketing Campaigns</Text>
       <Text style={editProfile.helpText}>
         Track and manage your marketing campaigns and initiatives
@@ -76,7 +76,7 @@ function CampaignCard({
   canRemove,
 }: CampaignCardProps) {
   return (
-    <View style={[onboard.card, { marginBottom: 16, position: "relative" }]}>
+    <View style={[{ marginVertical: 16, position: "relative" }]}>
       {canRemove && (
         <TouchableOpacity style={union.removeButton} onPress={onRemove}>
           <Ionicons name="close-circle" size={24} color={COLORS.error} />
@@ -90,7 +90,7 @@ function CampaignCard({
         <Controller
           control={control}
           name={`brandCampaigns.${index}.title`}
-          rules={{ required: "Campaign title is required" }}
+          // rules={{ required: "Campaign title is required" }}
           render={({ field: { onChange, value } }) => (
             <TextInput
               style={union.textInput}
@@ -161,7 +161,7 @@ function CampaignCard({
             control={control}
             name={`brandCampaigns.${index}.startDate`}
             rules={{
-              required: "Start date is required",
+              // required: "Start date is required",
               pattern: {
                 value: /^\d{4}-\d{2}-\d{2}$/,
                 message: "Please enter date in YYYY-MM-DD format",

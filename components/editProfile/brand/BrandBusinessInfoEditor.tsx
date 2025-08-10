@@ -14,37 +14,10 @@ export default function BrandBusinessInfoEditor({
   errors,
 }: BrandBusinessInfoEditorProps) {
   return (
-    <View style={onboard.card}>
+    <View style={onboard.wideCard}>
       <Text style={onboard.cardTitle}>Business Information</Text>
 
       <View style={union.flexRow}>
-        <View style={union.textInputContainer}>
-          <Text style={union.textInputLabel}>Company Size</Text>
-          <Controller
-            control={control}
-            name="brandBusinessInfo.companySize"
-            rules={{ required: "Company size is required" }}
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={union.textInput}
-                value={value || ""}
-                onChangeText={onChange}
-                placeholder="e.g., 1-10, 11-50, 51-200, 201-500, 501+"
-                placeholderTextColor={COLORS.textMuted}
-              />
-            )}
-          />
-          {(errors as any)?.brandBusinessInfo?.companySize && (
-            <Text style={editProfile.errorText}>
-              {(errors as any).brandBusinessInfo.companySize.message}
-            </Text>
-          )}
-          <Text style={editProfile.helpText}>
-            Enter your company size range (e.g., &ldquo;1-10&rdquo;,
-            &ldquo;11-50&rdquo;, &ldquo;501+&rdquo;)
-          </Text>
-        </View>
-
         <View style={union.textInputContainer}>
           <Text style={union.textInputLabel}>Industry</Text>
           <Controller
@@ -119,7 +92,7 @@ export default function BrandBusinessInfoEditor({
       </View>
 
       {/* Contact Information Section */}
-      <View style={[onboard.card, { marginTop: 16, marginBottom: 0 }]}>
+      <View style={[{ marginTop: 16, marginBottom: 0 }]}>
         <Text style={onboard.cardTitle}>Contact Information</Text>
 
         <View style={union.textInputContainer}>

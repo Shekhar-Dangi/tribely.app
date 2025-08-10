@@ -119,15 +119,9 @@ interface EditProfileForm {
     trainerCount: number;
     equipmentCount?: number;
   };
-  verification?: {
-    businessLicense: string;
-    taxId: string;
-    isVerified: boolean;
-    verificationDate: string;
-  };
+
   // Brand-specific fields
   brandBusinessInfo?: {
-    companySize: string;
     industry: string;
     website: string;
     headquarters: string;
@@ -153,12 +147,6 @@ interface EditProfileForm {
     endDate?: string;
     isActive: boolean;
   }[];
-  brandVerification?: {
-    businessRegistration: string;
-    taxId: string;
-    isVerified: boolean;
-    verificationDate: string;
-  };
 }
 
 export default function EditProfile() {
@@ -170,10 +158,10 @@ export default function EditProfile() {
   const updateUser = useMutation(api.users.updateUser);
   const updateUserLocation = useMutation(api.users.updateUserLocation);
   const updateIndividualProfile = useMutation(
-    api.users.updateIndividualProfile
+    api.individuals.updateIndividualProfile
   );
-  const updateGymProfile = useMutation(api.users.updateGymProfile);
-  const updateBrandProfile = useMutation(api.users.updateBrandProfile);
+  const updateGymProfile = useMutation(api.gyms.updateGymProfile);
+  const updateBrandProfile = useMutation(api.brands.updateBrandProfile);
   const { uploadImage } = useCloudinaryUpload();
 
   const {
@@ -192,7 +180,7 @@ export default function EditProfile() {
       location: {
         city: userData?.location?.city || "",
         state: userData?.location?.state || "",
-        country: userData?.location?.country || "USA", // Default to USA
+        country: userData?.location?.country || "",
       },
       // Individual-specific defaults
       ...(userData?.userType === "individual" && {
@@ -316,8 +304,6 @@ export default function EditProfile() {
       // Brand-specific defaults
       ...(userData?.userType === "brand" && {
         brandBusinessInfo: {
-          companySize:
-            (userData?.profile as any)?.businessInfo?.companySize || "",
           industry: (userData?.profile as any)?.businessInfo?.industry || "",
           website: (userData?.profile as any)?.businessInfo?.website || "",
           headquarters:
@@ -378,20 +364,6 @@ export default function EditProfile() {
             isActive: true,
           },
         ],
-        brandVerification: {
-          businessRegistration:
-            (userData?.profile as any)?.verification?.businessRegistration ||
-            "",
-          taxId: (userData?.profile as any)?.verification?.taxId || "",
-          isVerified:
-            (userData?.profile as any)?.verification?.isVerified || false,
-          verificationDate: (userData?.profile as any)?.verification
-            ?.verificationDate
-            ? new Date((userData?.profile as any).verification.verificationDate)
-                .toISOString()
-                .split("T")[0]
-            : "",
-        },
       }),
     },
   });
@@ -749,30 +721,6 @@ export default function EditProfile() {
           }
         }
 
-        // Check for verification changes
-        if (formData.verification) {
-          const currentVerification =
-            (userData.profile as any)?.verification || {};
-          const newVerification = {
-            businessLicense: formData.verification.businessLicense,
-            taxId: formData.verification.taxId,
-            isVerified: formData.verification.isVerified,
-            ...(formData.verification.verificationDate &&
-              formData.verification.verificationDate.trim() !== "" && {
-                verificationDate: new Date(
-                  formData.verification.verificationDate
-                ).getTime(),
-              }),
-          };
-
-          if (
-            JSON.stringify(newVerification) !==
-            JSON.stringify(currentVerification)
-          ) {
-            gymUpdates.verification = newVerification;
-          }
-        }
-
         // Update gym-specific fields if there are changes
         if (Object.keys(gymUpdates).length > 0) {
           await updateGymProfile({
@@ -786,7 +734,6 @@ export default function EditProfile() {
         console.log("Brand Business Info:", formData.brandBusinessInfo);
         console.log("Brand Partnerships:", formData.brandPartnerships);
         console.log("Brand Campaigns:", formData.brandCampaigns);
-        console.log("Brand Verification:", formData.brandVerification);
 
         // Handle brand-specific profile updates
         const brandUpdates: any = {};
@@ -797,7 +744,6 @@ export default function EditProfile() {
           const currentBusinessInfo =
             (userData.profile as any)?.businessInfo || {};
           const newBusinessInfo = {
-            companySize: formData.brandBusinessInfo.companySize,
             industry: formData.brandBusinessInfo.industry,
             website: formData.brandBusinessInfo.website,
             headquarters: formData.brandBusinessInfo.headquarters,
@@ -897,40 +843,6 @@ export default function EditProfile() {
           console.log("No brand campaigns in form data");
         }
 
-        // Check for verification changes
-        if (formData.brandVerification) {
-          console.log("Processing verification...");
-          const currentVerification =
-            (userData.profile as any)?.verification || {};
-          const newVerification = {
-            businessRegistration:
-              formData.brandVerification.businessRegistration,
-            taxId: formData.brandVerification.taxId,
-            isVerified: formData.brandVerification.isVerified,
-            ...(formData.brandVerification.verificationDate &&
-              formData.brandVerification.verificationDate.trim() !== "" && {
-                verificationDate: new Date(
-                  formData.brandVerification.verificationDate
-                ).getTime(),
-              }),
-          };
-
-          console.log("Current Verification:", currentVerification);
-          console.log("New Verification:", newVerification);
-
-          if (
-            JSON.stringify(newVerification) !==
-            JSON.stringify(currentVerification)
-          ) {
-            console.log("Verification changed - adding to updates");
-            brandUpdates.verification = newVerification;
-          } else {
-            console.log("Verification unchanged");
-          }
-        } else {
-          console.log("No brand verification in form data");
-        }
-
         console.log("=== FINAL BRAND UPDATES ===");
         console.log("Brand Updates Object:", brandUpdates);
         console.log("Updates Count:", Object.keys(brandUpdates).length);
@@ -984,7 +896,9 @@ export default function EditProfile() {
         </TouchableOpacity>
         <Text style={editProfile.headerTitle}>Edit Profile</Text>
         <TouchableOpacity
-          onPress={handleSubmit(onSubmit)}
+          onPress={handleSubmit(onSubmit, (errors) => {
+            console.log(errors);
+          })}
           disabled={isSaving || !hasAnyChanges}
           style={[
             editProfile.saveButton,
@@ -1012,7 +926,7 @@ export default function EditProfile() {
         showsVerticalScrollIndicator={false}
       >
         {/* Avatar Section */}
-        <View style={onboard.card}>
+        <View style={onboard.wideCard}>
           <Text style={onboard.cardTitle}>Profile Picture</Text>
           <View style={editProfile.avatarSection}>
             <TouchableOpacity
@@ -1059,7 +973,7 @@ export default function EditProfile() {
         </View>
 
         {/* Basic Information */}
-        <View style={onboard.card}>
+        <View style={onboard.wideCard}>
           <Text style={onboard.cardTitle}>Basic Information</Text>
 
           {/* Username (Read-only) */}
@@ -1106,7 +1020,7 @@ export default function EditProfile() {
         </View>
 
         {/* Location */}
-        <View style={onboard.card}>
+        <View style={onboard.wideCard}>
           <Text style={onboard.cardTitle}>Location</Text>
 
           <View style={union.flexRow}>
@@ -1120,7 +1034,7 @@ export default function EditProfile() {
                     style={union.textInput}
                     value={value}
                     onChangeText={onChange}
-                    placeholder="e.g., New York"
+                    placeholder="Tokyo"
                     placeholderTextColor={COLORS.textMuted}
                   />
                 )}
@@ -1137,9 +1051,8 @@ export default function EditProfile() {
                     style={union.textInput}
                     value={value}
                     onChangeText={onChange}
-                    placeholder="e.g., NY"
+                    placeholder="Hokkaido"
                     placeholderTextColor={COLORS.textMuted}
-                    maxLength={2}
                     autoCapitalize="characters"
                   />
                 )}
@@ -1157,7 +1070,7 @@ export default function EditProfile() {
                   style={union.textInput}
                   value={value}
                   onChangeText={onChange}
-                  placeholder="e.g., USA"
+                  placeholder="Japan"
                   placeholderTextColor={COLORS.textMuted}
                 />
               )}
@@ -1166,7 +1079,7 @@ export default function EditProfile() {
         </View>
 
         {/* Social Links */}
-        <View style={onboard.card}>
+        <View style={onboard.wideCard}>
           <Text style={onboard.cardTitle}>Social Links</Text>
 
           <View style={union.textInputContainer}>
@@ -1293,11 +1206,11 @@ export default function EditProfile() {
             <AmenitiesEditor control={control} errors={errors} />
             <MembershipPlansEditor control={control} errors={errors} />
             <GymStatsEditor control={control} errors={errors} />
-            <VerificationEditor
+            {/* <VerificationEditor
               control={control}
               errors={errors}
               watch={watch}
-            />
+            /> */}
           </>
         )}
 
@@ -1307,11 +1220,11 @@ export default function EditProfile() {
             <BrandBusinessInfoEditor control={control} errors={errors} />
             <PartnershipsEditor control={control} errors={errors} />
             <CampaignsEditor control={control} errors={errors} />
-            <BrandVerificationEditor
+            {/* <BrandVerificationEditor
               control={control}
               errors={errors}
               watch={watch}
-            />
+            /> */}
           </>
         )}
 

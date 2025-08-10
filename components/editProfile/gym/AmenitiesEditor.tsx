@@ -29,7 +29,7 @@ export default function AmenitiesEditor({
   };
 
   return (
-    <View style={onboard.card}>
+    <View style={onboard.wideCard}>
       <Text style={onboard.cardTitle}>Amenities & Equipment</Text>
       <Text style={editProfile.helpText}>
         List the amenities and equipment available at your gym

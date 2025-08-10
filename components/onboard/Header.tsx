@@ -1,6 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
 import { COLORS, FONTS, SPACING } from "../../constants/theme";
-import { onboard } from "@/constants/styles";
 
 interface HeaderProps {
   title: string;
@@ -9,7 +8,7 @@ interface HeaderProps {
 
 export default function Header({ title, subtitle }: HeaderProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {}]}>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
     </View>

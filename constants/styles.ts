@@ -78,8 +78,8 @@ export const union = StyleSheet.create({
   },
   removeButton: {
     position: "absolute",
-    top: SPACING.sm,
-    right: SPACING.sm,
+    top: 0,
+    right: 0,
     width: 24,
     height: 24,
 
@@ -106,6 +106,10 @@ export const onboard = StyleSheet.create({
     ...SHADOWS.small,
     borderWidth: 1,
     borderColor: COLORS.border,
+  },
+  wideCard: {
+    marginVertical: 32,
+    paddingHorizontal: 16,
   },
   cardTitle: {
     fontSize: FONTS.sizes.md,
@@ -596,6 +600,7 @@ export const editProfile = StyleSheet.create({
     zIndex: 1,
   },
   socialInput: {
+    flex: 1,
     paddingLeft: 24,
   },
   errorText: {

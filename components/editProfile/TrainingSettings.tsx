@@ -18,7 +18,7 @@ export default function TrainingSettings({
   const isTrainingEnabled = watch("isTrainingEnabled");
 
   return (
-    <View style={onboard.card}>
+    <View style={onboard.wideCard}>
       <Text style={onboard.cardTitle}>Training Services</Text>
 
       <View style={styles.switchContainer}>

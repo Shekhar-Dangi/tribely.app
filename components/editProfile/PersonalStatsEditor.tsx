@@ -35,7 +35,7 @@ export default function PersonalStatsEditor({
   };
 
   return (
-    <View style={onboard.card}>
+    <View style={onboard.wideCard}>
       <Text style={onboard.cardTitle}>Personal Stats</Text>
 
       {/* Basic Measurements */}
@@ -144,10 +144,7 @@ export default function PersonalStatsEditor({
       </Text>
 
       {fields.map((field, index) => (
-        <View
-          key={field.id}
-          style={[onboard.card, { marginBottom: 16, position: "relative" }]}
-        >
+        <View key={field.id} style={{ marginBottom: 16, position: "relative" }}>
           {fields.length > 1 && (
             <TouchableOpacity
               style={union.removeButton}

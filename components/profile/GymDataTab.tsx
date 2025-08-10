@@ -116,7 +116,7 @@ export default function GymDataTab({
                 <MaterialIcons
                   name="location-on"
                   size={20}
-                  color={COLORS.error}
+                  color={COLORS.secondary}
                 />
               </View>
               <View style={{ flex: 1 }}>
@@ -219,18 +219,8 @@ export default function GymDataTab({
                 { flexDirection: "row", alignItems: "flex-start" },
               ]}
             >
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  backgroundColor: COLORS.background,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginRight: 12,
-                }}
-              >
-                <FontAwesome5 name="list" size={20} color={COLORS.secondary} />
+              <View style={profile.dataCard}>
+                {/* <FontAwesome5 name="list" size={20} color={COLORS.secondary} /> */}
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={profile.dataCardTitle}>Amenities</Text>
@@ -269,7 +259,7 @@ export default function GymDataTab({
                 <MaterialIcons
                   name="card-membership"
                   size={20}
-                  color={COLORS.premium}
+                  color={COLORS.primary}
                 />
               </View>
               <View style={{ flex: 1 }}>

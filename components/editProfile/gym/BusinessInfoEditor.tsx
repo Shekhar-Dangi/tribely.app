@@ -14,7 +14,7 @@ export default function BusinessInfoEditor({
   errors,
 }: BusinessInfoEditorProps) {
   return (
-    <View style={onboard.card}>
+    <View style={onboard.wideCard}>
       <Text style={onboard.cardTitle}>Business Information</Text>
 
       <View style={union.textInputContainer}>

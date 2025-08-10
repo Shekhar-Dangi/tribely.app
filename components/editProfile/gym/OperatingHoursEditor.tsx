@@ -24,7 +24,7 @@ export default function OperatingHoursEditor({
   errors,
 }: OperatingHoursEditorProps) {
   return (
-    <View style={onboard.card}>
+    <View style={onboard.wideCard}>
       <Text style={onboard.cardTitle}>Operating Hours</Text>
       <Text style={editProfile.helpText}>
         Enter hours in format: &ldquo;6:00 AM - 10:00 PM&rdquo; or

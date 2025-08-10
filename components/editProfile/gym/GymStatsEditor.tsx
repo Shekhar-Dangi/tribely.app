@@ -14,7 +14,7 @@ export default function GymStatsEditor({
   errors,
 }: GymStatsEditorProps) {
   return (
-    <View style={onboard.card}>
+    <View style={onboard.wideCard}>
       <Text style={onboard.cardTitle}>Gym Statistics</Text>
       <Text style={editProfile.helpText}>
         Provide key statistics about your gym

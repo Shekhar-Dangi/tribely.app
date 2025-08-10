@@ -42,7 +42,7 @@ export default function PartnershipsEditor({
   };
 
   return (
-    <View style={onboard.card}>
+    <View style={onboard.wideCard}>
       <Text style={onboard.cardTitle}>Partnerships</Text>
       <Text style={editProfile.helpText}>
         Manage your brand partnerships with gyms, trainers, and other brands
@@ -85,7 +85,7 @@ function PartnershipCard({
   partnerTypes,
 }: PartnershipCardProps) {
   return (
-    <View style={[onboard.card, { marginBottom: 16, position: "relative" }]}>
+    <View style={[{ marginVertical: 16, position: "relative" }]}>
       {canRemove && (
         <TouchableOpacity style={union.removeButton} onPress={onRemove}>
           <Ionicons name="close-circle" size={24} color={COLORS.error} />

@@ -102,16 +102,16 @@ export default function BrandPartnerships() {
         />
 
         <View style={onboard.card}>
-          <Text style={onboard.cardTitle}>🤝 Current Partnerships</Text>
+          <Text style={onboard.cardTitle}>🤝Current Partnerships</Text>
 
           {fields.map((field, index) => (
             <View
               key={field.id}
               style={{
-                backgroundColor: "#f8f9fa",
-                padding: 16,
-                marginBottom: 16,
-                borderRadius: 8,
+                // backgroundColor: "#f8f9fa",
+                // padding: 16,
+                // marginBottom: 16,
+                // borderRadius: 8,
                 position: "relative",
               }}
             >
@@ -119,7 +119,7 @@ export default function BrandPartnerships() {
                 style={[
                   union.removeButton,
                   {
-                    backgroundColor: COLORS.error,
+                    backgroundColor: COLORS.secondary,
                     borderRadius: 12,
                   },
                 ]}
@@ -337,21 +337,6 @@ export default function BrandPartnerships() {
             }}
           >
             Partnerships help showcase your brand&apos;s network and credibility
-          </Text>
-        </View>
-
-        <View style={onboard.card}>
-          <Text style={onboard.cardTitle}>🎉 Ready to Launch!</Text>
-          <Text
-            style={{
-              fontSize: 16,
-              color: "#333",
-              textAlign: "center",
-              lineHeight: 24,
-            }}
-          >
-            You&apos;re all set! Your brand profile will help you connect with
-            gyms, individuals, and other brands in the fitness community.
           </Text>
         </View>
       </ScrollView>

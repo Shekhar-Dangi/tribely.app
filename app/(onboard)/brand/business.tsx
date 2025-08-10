@@ -40,22 +40,22 @@ export default function BrandBusinessInfo() {
   };
 
   return (
-    <View style={tabs.container}>
+    <View style={[tabs.container, {}]}>
       <ProgressBar currentStep={2} totalSteps={3} progress={67} />
 
       <ScrollView
-        style={onboard.scrollView}
+        style={[onboard.scrollView, { width: "100%" }]}
         showsVerticalScrollIndicator={false}
       >
         <Header
           title="Business Information"
-          subtitle="Tell us more about your company's size and industry focus."
+          subtitle="Tell us more about your industry focus."
         />
 
         <View style={onboard.card}>
           <Text style={onboard.cardTitle}>🏢 Company Details</Text>
 
-          <View style={union.textInputContainer}>
+          <View style={[union.textInputContainer, { flex: 0 }]}>
             <Text style={union.textInputLabel}>Industry</Text>
             <Controller
               control={control}
@@ -84,7 +84,7 @@ export default function BrandBusinessInfo() {
             )}
           </View>
 
-          <View style={union.textInputContainer}>
+          <View style={[union.textInputContainer, { flex: 0 }]}>
             <Text style={union.textInputLabel}>Headquarters Location</Text>
             <Controller
               control={control}
@@ -102,7 +102,7 @@ export default function BrandBusinessInfo() {
           </View>
         </View>
 
-        <View style={onboard.card}>
+        {/* <View style={onboard.card}>
           <Text style={onboard.cardTitle}>📊 Company Size</Text>
           <Text style={{ fontSize: 14, color: "#666", marginBottom: 16 }}>
             Select your current employee range
@@ -119,7 +119,7 @@ export default function BrandBusinessInfo() {
           >
             This helps partners understand your scale and capabilities
           </Text>
-        </View>
+        </View> */}
       </ScrollView>
 
       <NavigationButtons
