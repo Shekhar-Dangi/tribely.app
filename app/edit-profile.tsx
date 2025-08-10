@@ -43,6 +43,9 @@ import PartnershipsEditor from "@/components/editProfile/brand/PartnershipsEdito
 import CampaignsEditor from "@/components/editProfile/brand/CampaignsEditor";
 import BrandVerificationEditor from "@/components/editProfile/brand/BrandVerificationEditor";
 
+// Location Components
+import { EnhancedLocationPicker, LocationData } from "@/components/location";
+
 interface EditProfileForm {
   bio: string;
   socialLinks: {
@@ -1023,59 +1026,40 @@ export default function EditProfile() {
         <View style={onboard.wideCard}>
           <Text style={onboard.cardTitle}>Location</Text>
 
-          <View style={union.flexRow}>
-            <View style={union.textInputContainer}>
-              <Text style={union.textInputLabel}>City</Text>
-              <Controller
-                control={control}
-                name="location.city"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    style={union.textInput}
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Tokyo"
-                    placeholderTextColor={COLORS.textMuted}
-                  />
-                )}
-              />
-            </View>
+          <Controller
+            control={control}
+            name="location"
+            render={({ field: { onChange, value } }) => {
+              // Convert form location to LocationData format
+              const locationValue: LocationData = {
+                city: value?.city || undefined,
+                state: value?.state || undefined,
+                country: value?.country || undefined,
+              };
 
-            <View style={union.textInputContainer}>
-              <Text style={union.textInputLabel}>State</Text>
-              <Controller
-                control={control}
-                name="location.state"
-                render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    style={union.textInput}
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Hokkaido"
-                    placeholderTextColor={COLORS.textMuted}
-                    autoCapitalize="characters"
-                  />
-                )}
-              />
-            </View>
-          </View>
+              // Handle location change from LocationPicker
+              const handleLocationChange = (newLocation: LocationData) => {
+                onChange({
+                  city: newLocation.city || "",
+                  state: newLocation.state || "",
+                  country: newLocation.country || "",
+                });
 
-          <View style={union.textInputContainer}>
-            <Text style={union.textInputLabel}>Country</Text>
-            <Controller
-              control={control}
-              name="location.country"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={union.textInput}
-                  value={value}
-                  onChangeText={onChange}
-                  placeholder="Japan"
-                  placeholderTextColor={COLORS.textMuted}
+                // If coordinates are available, we could store them separately
+                // For now, we'll just update the form fields
+                console.log("Location selected:", newLocation);
+              };
+
+              return (
+                <EnhancedLocationPicker
+                  value={locationValue}
+                  onChange={handleLocationChange}
+                  placeholder="Search for your location"
+                  showGPSOption={true}
                 />
-              )}
-            />
-          </View>
+              );
+            }}
+          />
         </View>
 
         {/* Social Links */}
