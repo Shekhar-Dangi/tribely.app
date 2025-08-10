@@ -34,6 +34,16 @@
       "expo-router",
       "expo-dev-client",
       [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow tribely to use your location to show relevant content and improve your experience.",
+          "locationWhenInUsePermission": "Allow tribely to use your location to show relevant content and improve your experience.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false,
+          "isAndroidForegroundServiceEnabled": false
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/logo.png",

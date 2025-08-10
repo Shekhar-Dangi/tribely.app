@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -43,8 +43,8 @@ import PartnershipsEditor from "@/components/editProfile/brand/PartnershipsEdito
 import CampaignsEditor from "@/components/editProfile/brand/CampaignsEditor";
 import BrandVerificationEditor from "@/components/editProfile/brand/BrandVerificationEditor";
 
-// Location Components
-import { EnhancedLocationPicker, LocationData } from "@/components/location";
+// Location Selector Component
+import LocationSelector from "@/components/LocationSelector";
 
 interface EditProfileForm {
   bio: string;
@@ -57,6 +57,10 @@ interface EditProfileForm {
     city: string;
     state: string;
     country: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
   };
   // Individual-specific fields
   personalStats?: {
@@ -184,6 +188,12 @@ export default function EditProfile() {
         city: userData?.location?.city || "",
         state: userData?.location?.state || "",
         country: userData?.location?.country || "",
+        coordinates: userData?.location?.coordinates
+          ? {
+              latitude: userData.location.coordinates.latitude,
+              longitude: userData.location.coordinates.longitude,
+            }
+          : undefined,
       },
       // Individual-specific defaults
       ...(userData?.userType === "individual" && {
@@ -378,6 +388,17 @@ export default function EditProfile() {
   // Check if there are any changes (form changes or avatar changes)
   const hasAnyChanges = isDirty || currentAvatar !== userData?.avatarUrl;
 
+  // Debug form state changes
+  useEffect(() => {
+    console.log("=== FORM STATE DEBUG ===");
+    console.log("isDirty:", isDirty);
+    console.log("hasAnyChanges:", hasAnyChanges);
+    console.log(
+      "currentAvatar !== userData?.avatarUrl:",
+      currentAvatar !== userData?.avatarUrl
+    );
+  }, [isDirty, hasAnyChanges, currentAvatar, userData?.avatarUrl]);
+
   const handleGoBack = () => {
     if (hasAnyChanges) {
       Alert.alert(
@@ -508,7 +529,11 @@ export default function EditProfile() {
       const locationChanged =
         newLocation.city !== (currentLocation.city || "") ||
         newLocation.state !== (currentLocation.state || "") ||
-        newLocation.country !== (currentLocation.country || "");
+        newLocation.country !== (currentLocation.country || "") ||
+        newLocation.coordinates?.latitude !==
+          currentLocation.coordinates?.latitude ||
+        newLocation.coordinates?.longitude !==
+          currentLocation.coordinates?.longitude;
 
       if (locationChanged) {
         await updateUserLocation({
@@ -517,6 +542,12 @@ export default function EditProfile() {
             city: newLocation.city || undefined,
             state: newLocation.state || undefined,
             country: newLocation.country || undefined,
+            ...(newLocation.coordinates && {
+              coordinates: {
+                latitude: newLocation.coordinates.latitude,
+                longitude: newLocation.coordinates.longitude,
+              },
+            }),
           },
         });
       }
@@ -927,6 +958,7 @@ export default function EditProfile() {
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Avatar Section */}
         <View style={onboard.wideCard}>
@@ -1024,41 +1056,16 @@ export default function EditProfile() {
 
         {/* Location */}
         <View style={onboard.wideCard}>
-          <Text style={onboard.cardTitle}>Location</Text>
-
           <Controller
             control={control}
             name="location"
-            render={({ field: { onChange, value } }) => {
-              // Convert form location to LocationData format
-              const locationValue: LocationData = {
-                city: value?.city || undefined,
-                state: value?.state || undefined,
-                country: value?.country || undefined,
-              };
-
-              // Handle location change from LocationPicker
-              const handleLocationChange = (newLocation: LocationData) => {
-                onChange({
-                  city: newLocation.city || "",
-                  state: newLocation.state || "",
-                  country: newLocation.country || "",
-                });
-
-                // If coordinates are available, we could store them separately
-                // For now, we'll just update the form fields
-                console.log("Location selected:", newLocation);
-              };
-
-              return (
-                <EnhancedLocationPicker
-                  value={locationValue}
-                  onChange={handleLocationChange}
-                  placeholder="Search for your location"
-                  showGPSOption={true}
-                />
-              );
-            }}
+            render={({ field: { onChange, value } }) => (
+              <LocationSelector
+                value={value}
+                onChange={onChange}
+                placeholder="Search for your location..."
+              />
+            )}
           />
         </View>
 
