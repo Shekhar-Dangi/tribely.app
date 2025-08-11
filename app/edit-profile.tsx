@@ -915,10 +915,10 @@ export default function EditProfile() {
       })}
       disabled={isSaving || !hasAnyChanges}
       style={[
-        editProfile.iconButton,
-        (!hasAnyChanges || isSaving) && editProfile.saveButtonDisabled,
+        editProfile.saveButton,
+        !hasAnyChanges || isSaving ? editProfile.saveButtonDisabled : null,
       ]}
-      activeOpacity={0.6}
+      activeOpacity={0.8}
     >
       {isSaving ? (
         <ActivityIndicator size="small" color={COLORS.text} />

@@ -524,14 +524,15 @@ export const editProfile = StyleSheet.create({
   },
   saveButton: {
     backgroundColor: COLORS.secondary,
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.sm,
     borderRadius: BORDER_RADIUS.sm,
-    minWidth: 60,
+
     alignItems: "center",
+    justifyContent: "center",
   },
   saveButtonDisabled: {
-    backgroundColor: COLORS.lightGray,
+    backgroundColor: `${COLORS.secondary}55`, // lighter secondary
   },
   saveButtonText: {
     color: COLORS.white,

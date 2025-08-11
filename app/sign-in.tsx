@@ -34,7 +34,7 @@ export default function Page() {
         strategy: "oauth_google",
         redirectUrl: AuthSession.makeRedirectUri({
           scheme: "tribely",
-          path: "/(tabs)",
+          path: "(tabs)",
         }),
       });
 
