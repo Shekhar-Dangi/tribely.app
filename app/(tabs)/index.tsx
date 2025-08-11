@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, RefreshControl, ScrollView } from "react-native";
-import { useUser } from "@clerk/clerk-expo";
+import { useUser, useAuth } from "@clerk/clerk-expo";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { COLORS, FONTS, SPACING } from "@/constants/theme";
@@ -10,6 +10,7 @@ import { UserWithProfile } from "@/types/schema";
 
 export default function Index() {
   const { user: clerkUser } = useUser();
+  const { signOut } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
   // Get current user with profile using clerkId
@@ -42,8 +43,12 @@ export default function Index() {
     console.log("Notifications pressed");
   };
 
-  const handleSearch = () => {
-    console.log("Search pressed");
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   if (!currentUser) {
@@ -60,8 +65,8 @@ export default function Index() {
         title="Home"
         leftIcon="notifications-outline"
         onLeftPress={handleNotifications}
-        rightIcon="search-outline"
-        onRightPress={handleSearch}
+        rightIcon="log-out-outline"
+        onRightPress={handleLogout}
       />
 
       <ScrollView

@@ -1,9 +1,9 @@
 import { useSSO } from "@clerk/clerk-expo";
-import { Text } from "@react-navigation/elements";
 import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import React, { useCallback, useEffect } from "react";
-import { Pressable, View, StyleSheet, Image } from "react-native";
+import { Pressable, View, StyleSheet, Image, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   COLORS,
   FONTS,
@@ -48,56 +48,126 @@ export default function Page() {
   }, [startSSOFlow]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.content}>
-        <Text style={styles.title}>Welcome</Text>
-        <Text style={styles.subtitle}>Sign in to continue</Text>
-
-        <Pressable style={styles.googleButton} onPress={onPress}>
-          <View style={styles.buttonContent}>
+        {/* Header Section */}
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
             <Image
-              source={require("../assets/images/google-icon.svg")}
-              style={styles.googleIcon}
+              source={require("../assets/images/logo.png")}
+              style={styles.logo}
+              resizeMode="contain"
             />
-            <Text style={styles.buttonText}>Continue with Google</Text>
           </View>
-        </Pressable>
+
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Welcome to Tribely</Text>
+            <Text style={styles.subtitle}>
+              Connect with fitness enthusiasts, gyms, and brands in your
+              community
+            </Text>
+          </View>
+        </View>
+
+        {/* Sign In Section */}
+        <View style={styles.signInSection}>
+          <Text style={styles.signInTitle}>Get Started</Text>
+
+          <Pressable style={styles.googleButton} onPress={onPress}>
+            <View style={styles.buttonContent}>
+              <Image
+                source={require("../assets/images/google-icon.svg")}
+                style={styles.googleIcon}
+              />
+              <Text style={styles.buttonText}>Continue with Google</Text>
+            </View>
+          </Pressable>
+
+          <Text style={styles.termsText}>
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </Text>
+        </View>
       </View>
-    </View>
+
+      {/* Footer */}
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>
+          Join thousands of fitness enthusiasts already on Tribely
+        </Text>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
-    justifyContent: "center",
-    paddingHorizontal: SPACING.lg,
+    backgroundColor: COLORS.background,
   },
   content: {
+    flex: 1,
+    paddingHorizontal: SPACING.xl,
+    justifyContent: "space-between",
+  },
+
+  // Header Section
+  header: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
+    paddingTop: SPACING.xxxl,
+  },
+  logoContainer: {
+    marginBottom: SPACING.xxl,
+    alignItems: "center",
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: SPACING.lg,
+  },
+  titleContainer: {
+    alignItems: "center",
+    paddingHorizontal: SPACING.md,
   },
   title: {
     fontSize: FONTS.sizes.xxl,
-    fontWeight: FONTS.bold.fontWeight,
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
+    ...FONTS.bold,
+    color: COLORS.primary,
+    textAlign: "center",
+    marginBottom: SPACING.md,
   },
   subtitle: {
     fontSize: FONTS.sizes.md,
+    ...FONTS.regular,
     color: COLORS.textSecondary,
-    marginBottom: SPACING.xxl,
+    textAlign: "center",
+    lineHeight: 24,
+    marginBottom: SPACING.lg,
+  },
+
+  // Sign In Section
+  signInSection: {
+    paddingBottom: SPACING.xxl,
+  },
+  signInTitle: {
+    fontSize: FONTS.sizes.lg,
+    ...FONTS.bold,
+    color: COLORS.text,
+    textAlign: "center",
+    marginBottom: SPACING.xl,
   },
   googleButton: {
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.lg,
     paddingHorizontal: SPACING.xl,
     borderRadius: BORDER_RADIUS.md,
     width: "100%",
     alignItems: "center",
-    ...SHADOWS.small,
+    marginBottom: SPACING.lg,
+    ...SHADOWS.medium,
   },
   buttonContent: {
     flexDirection: "row",
@@ -105,13 +175,34 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   googleIcon: {
-    width: 20,
-    height: 20,
-    marginRight: SPACING.sm,
+    width: 24,
+    height: 24,
+    marginRight: SPACING.md,
   },
   buttonText: {
     fontSize: FONTS.sizes.md,
-    fontWeight: FONTS.medium.fontWeight,
+    ...FONTS.medium,
     color: COLORS.text,
+  },
+  termsText: {
+    fontSize: FONTS.sizes.sm,
+    ...FONTS.regular,
+    color: COLORS.textMuted,
+    textAlign: "center",
+    lineHeight: 20,
+    paddingHorizontal: SPACING.md,
+  },
+
+  // Footer Section
+  footer: {
+    paddingBottom: SPACING.xl,
+    paddingHorizontal: SPACING.md,
+  },
+  footerText: {
+    fontSize: FONTS.sizes.sm,
+    ...FONTS.medium,
+    color: COLORS.secondary,
+    textAlign: "center",
+    lineHeight: 20,
   },
 });
