@@ -498,6 +498,24 @@ export default defineSchema({
     .index("by_following", ["followingId"])
     .index("by_mutual", ["followerId", "followingId"]),
 
+  // Training requests for individual trainers
+  trainingRequests: defineTable({
+    requesterId: v.id("users"), // User requesting training
+    trainerId: v.id("users"), // Trainer being requested
+    message: v.optional(v.string()),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("accepted"),
+      v.literal("rejected")
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_requester", ["requesterId"])
+    .index("by_trainer", ["trainerId"])
+    .index("by_requester_trainer", ["requesterId", "trainerId"])
+    .index("by_status", ["status"]),
+
   // ──────── BLOCKING & REPORTING ────────
   blockedUsers: defineTable({
     blockerId: v.id("users"),

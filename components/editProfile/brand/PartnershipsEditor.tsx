@@ -99,7 +99,7 @@ function PartnershipCard({
         <Controller
           control={control}
           name={`brandPartnerships.${index}.partnerName`}
-          rules={{ required: "Partner name is required" }}
+          // rules={{ required: "Partner name is required" }}
           render={({ field: { onChange, value } }) => (
             <TextInput
               style={union.textInput}
@@ -124,7 +124,7 @@ function PartnershipCard({
           <Controller
             control={control}
             name={`brandPartnerships.${index}.partnerType`}
-            rules={{ required: "Partner type is required" }}
+            // rules={{ required: "Partner type is required" }}
             render={({ field: { onChange, value } }) => (
               <TextInput
                 style={union.textInput}
@@ -151,7 +151,7 @@ function PartnershipCard({
           <Controller
             control={control}
             name={`brandPartnerships.${index}.partnership_type`}
-            rules={{ required: "Partnership type is required" }}
+            // rules={{ required: "Partnership type is required" }}
             render={({ field: { onChange, value } }) => (
               <TextInput
                 style={union.textInput}
@@ -181,7 +181,7 @@ function PartnershipCard({
             control={control}
             name={`brandPartnerships.${index}.startDate`}
             rules={{
-              required: "Start date is required",
+              // required: "Start date is required",
               pattern: {
                 value: /^\d{4}-\d{2}-\d{2}$/,
                 message: "Please enter date in YYYY-MM-DD format",

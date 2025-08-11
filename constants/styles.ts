@@ -214,8 +214,8 @@ export const profile = StyleSheet.create({
     alignItems: "flex-start",
   },
   avatar: {
-    width: 50,
-    height: 50,
+    width: 80,
+    height: 80,
     borderRadius: 60,
     borderWidth: 3,
     borderColor: COLORS.secondary,
@@ -243,14 +243,13 @@ export const profile = StyleSheet.create({
   },
   userInfo: {
     alignItems: "flex-start",
-    marginBottom: SPACING.lg,
-    flex: 1,
+    marginTop: SPACING.md,
   },
   userName: {
     fontSize: FONTS.sizes.lg,
     ...FONTS.bold,
     color: COLORS.primary,
-    marginBottom: SPACING.xs,
+    // marginBottom: SPACING.xs,
   },
   userHandle: {
     fontSize: FONTS.sizes.xs,
@@ -348,10 +347,11 @@ export const profile = StyleSheet.create({
 
   // Stats Section
   statsContainer: {
-    // backgroundColor: COLORS.background,
-    // margin: SPACING.md,
-    // borderRadius: BORDER_RADIUS.md,
-    // padding: SPACING.lg,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: SPACING.xl,
+    flex: 1,
   },
   statsRow: {
     flexDirection: "row",
@@ -360,6 +360,13 @@ export const profile = StyleSheet.create({
   },
   statItem: {
     alignItems: "center",
+    paddingHorizontal: SPACING.md,
+  },
+  statNumber: {
+    fontSize: FONTS.sizes.md,
+    ...FONTS.bold,
+    color: COLORS.text,
+    lineHeight: 22,
   },
   statValue: {
     fontSize: FONTS.sizes.lg,
@@ -367,10 +374,11 @@ export const profile = StyleSheet.create({
     color: COLORS.primary,
   },
   statLabel: {
-    fontSize: FONTS.sizes.xs,
+    fontSize: FONTS.sizes.sm,
     color: COLORS.textSecondary,
-    ...FONTS.medium,
+    ...FONTS.regular,
     marginTop: SPACING.xs,
+    lineHeight: 16,
   },
 
   // Section Headers
@@ -429,7 +437,7 @@ export const profile = StyleSheet.create({
   userType: {
     fontSize: FONTS.sizes.sm,
     color: COLORS.primary,
-    marginVertical: 4,
+    marginVertical: SPACING.xs,
   },
   userLocation: {
     fontSize: FONTS.sizes.sm,
@@ -482,10 +490,9 @@ export const editProfile = StyleSheet.create({
   // Header styles
   header: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    paddingBottom: SPACING.md,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },

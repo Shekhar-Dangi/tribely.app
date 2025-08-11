@@ -1,7 +1,14 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
-import { useUser } from "@clerk/clerk-expo";
-import { useRouter } from "expo-router";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { profile } from "@/constants/styles";
 import { COLORS } from "@/constants/theme";
@@ -9,20 +16,89 @@ import DataTab from "@/components/profile/DataTab";
 import BrandDataTab from "@/components/profile/BrandDataTab";
 import GymDataTab from "@/components/profile/GymDataTab";
 import PostsTab from "@/components/posts/PostsTab";
-import ProfileHeader from "@/components/profile/ProfileHeader";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   isIndividualProfile,
   isGymProfile,
   isBrandProfile,
 } from "@/types/schema";
+import { ProfileHeader } from "@/components";
 
-export default function Profile() {
-  const { user } = useUser();
+export default function UserProfile() {
+  const { username } = useLocalSearchParams<{ username: string }>();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("data");
 
-  const userData = useCurrentUser();
+  const currentUser = useCurrentUser();
+  const userData = useQuery(api.users.getUserByUsername, {
+    username: username!,
+  });
+
+  // Check if this is the current user's profile
+  const isOwnProfile = currentUser?.username === username;
+
+  // Follow status
+  const isFollowing = useQuery(
+    api.follows.isFollowing,
+    currentUser && userData && !isOwnProfile
+      ? {
+          followerId: currentUser._id as Id<"users">,
+          followingId: userData._id,
+        }
+      : "skip"
+  );
+
+  // Training request status
+  const trainingRequestStatus = useQuery(
+    api.follows.hasTrainingRequest,
+    currentUser &&
+      userData &&
+      !isOwnProfile &&
+      userData.userType === "individual"
+      ? { requesterId: currentUser._id as Id<"users">, trainerId: userData._id }
+      : "skip"
+  );
+
+  // Mutations
+  const followUser = useMutation(api.follows.followUser);
+  const unfollowUser = useMutation(api.follows.unfollowUser);
+  const sendTrainingRequest = useMutation(api.follows.sendTrainingRequest);
+
+  const handleTrain = async () => {
+    if (!currentUser || !userData) return;
+
+    try {
+      await sendTrainingRequest({
+        requesterId: currentUser._id as Id<"users">,
+        trainerId: userData._id,
+      });
+      console.log("Training request sent successfully");
+    } catch (error) {
+      console.error("Failed to send training request:", error);
+    }
+  };
+
+  const handleFollow = async () => {
+    if (!currentUser || !userData) return;
+
+    try {
+      if (isFollowing) {
+        await unfollowUser({
+          followerId: currentUser._id as Id<"users">,
+          followingId: userData._id,
+        });
+        console.log("Unfollowed user");
+      } else {
+        await followUser({
+          followerId: currentUser._id as Id<"users">,
+          followingId: userData._id,
+        });
+        console.log("Followed user");
+      }
+    } catch (error) {
+      console.error("Failed to follow/unfollow user:", error);
+    }
+  };
 
   const handleEdit = () => {
     router.push("/edit-profile");
@@ -33,15 +109,9 @@ export default function Profile() {
     console.log("Settings");
   };
 
-  const handleNotifications = () => {
-    console.log("Notifications pressed");
-  };
-
-  const handleMessages = () => {
-    console.log("Messages pressed");
-  };
-
   const renderTabContent = () => {
+    if (!userData) return null;
+
     switch (activeTab) {
       case "data":
         // Individual Profile
@@ -115,7 +185,8 @@ export default function Profile() {
   if (!userData) {
     return (
       <View style={profile.container}>
-        <Text style={profile.contentPlaceholder}>Loading...</Text>
+        <ActivityIndicator size="large" color={COLORS.secondary} />
+        <Text style={profile.contentPlaceholder}>Loading profile...</Text>
       </View>
     );
   }
@@ -123,8 +194,8 @@ export default function Profile() {
   return (
     <View style={profile.container}>
       <ProfileHeader
-        onNotificationsPress={handleNotifications}
-        onMessagesPress={handleMessages}
+        onNotificationsPress={() => {}}
+        onMessagesPress={() => {}}
       />
       <View style={profile.profileHeader}>
         <View style={profile.avatarContainer}>
@@ -163,25 +234,60 @@ export default function Profile() {
             )}
         </View>
       </View>
+
       <View style={profile.userInfo}>
-        <Text style={profile.userName}>{user?.fullName}</Text>
-        {/* <Text style={profile.userHandle}>@{userData.username}</Text> */}
+        <Text style={profile.userName}>@{userData.username}</Text>
         <Text style={profile.userType}>{userData.bio}</Text>
       </View>
-      {/* Stats Section - Instagram style */}
 
+      {/* Action Buttons - Different for own profile vs others */}
       <View style={profile.actionButtons}>
-        <TouchableOpacity style={profile.primaryButton} onPress={handleEdit}>
-          <Text style={profile.primaryButtonText}>Edit</Text>
-        </TouchableOpacity>
+        {isOwnProfile ? (
+          // Own profile buttons
+          <>
+            <TouchableOpacity
+              style={profile.primaryButton}
+              onPress={handleEdit}
+            >
+              <Text style={profile.primaryButtonText}>Edit</Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity
-          style={profile.secondaryButton}
-          onPress={handleSettings}
-        >
-          <Text style={profile.secondaryButtonText}>Settings</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={profile.secondaryButton}
+              onPress={handleSettings}
+            >
+              <Text style={profile.secondaryButtonText}>Settings</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          // Other user's profile buttons
+          <>
+            {userData.userType === "individual" &&
+              userData.profile &&
+              isIndividualProfile(userData.profile) &&
+              userData.profile.isTrainingEnabled && (
+                <TouchableOpacity
+                  style={profile.primaryButton}
+                  onPress={handleTrain}
+                >
+                  <Text style={profile.primaryButtonText}>
+                    {trainingRequestStatus === "pending" ? "Pending" : "Train"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+            <TouchableOpacity
+              style={profile.secondaryButton}
+              onPress={handleFollow}
+            >
+              <Text style={profile.secondaryButtonText}>
+                {isFollowing ? "Following" : "Follow"}
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
+
       {/* Tab Navigation */}
       <View style={profile.tabContainer}>
         <TouchableOpacity

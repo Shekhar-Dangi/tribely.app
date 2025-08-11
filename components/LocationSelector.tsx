@@ -75,6 +75,7 @@ export default function LocationSelector({
 
       // Request permission
       const { status } = await Location.requestForegroundPermissionsAsync();
+      console.log(status);
       if (status !== "granted") {
         Alert.alert(
           "Permission Denied",
@@ -88,7 +89,7 @@ export default function LocationSelector({
 
       // Get current position
       const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
+        accuracy: Location.Accuracy.Low,
       });
 
       console.log("LocationSelector: Current position obtained:", {

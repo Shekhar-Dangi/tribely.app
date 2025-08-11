@@ -300,19 +300,6 @@ export default function EditProfile() {
           equipmentCount:
             (userData?.profile as any)?.stats?.equipmentCount || undefined,
         },
-        verification: {
-          businessLicense:
-            (userData?.profile as any)?.verification?.businessLicense || "",
-          taxId: (userData?.profile as any)?.verification?.taxId || "",
-          isVerified:
-            (userData?.profile as any)?.verification?.isVerified || false,
-          verificationDate: (userData?.profile as any)?.verification
-            ?.verificationDate
-            ? new Date((userData?.profile as any).verification.verificationDate)
-                .toISOString()
-                .split("T")[0]
-            : "",
-        },
       }),
       // Brand-specific defaults
       ...(userData?.userType === "brand" && {
@@ -1197,11 +1184,6 @@ export default function EditProfile() {
             <AmenitiesEditor control={control} errors={errors} />
             <MembershipPlansEditor control={control} errors={errors} />
             <GymStatsEditor control={control} errors={errors} />
-            {/* <VerificationEditor
-              control={control}
-              errors={errors}
-              watch={watch}
-            /> */}
           </>
         )}
 
@@ -1211,11 +1193,6 @@ export default function EditProfile() {
             <BrandBusinessInfoEditor control={control} errors={errors} />
             <PartnershipsEditor control={control} errors={errors} />
             <CampaignsEditor control={control} errors={errors} />
-            {/* <BrandVerificationEditor
-              control={control}
-              errors={errors}
-              watch={watch}
-            /> */}
           </>
         )}
 

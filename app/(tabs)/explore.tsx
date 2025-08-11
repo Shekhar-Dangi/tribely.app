@@ -7,44 +7,31 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
+import { useRouter } from "expo-router";
 import { api } from "@/convex/_generated/api";
-import { COLORS } from "@/constants/theme";
+import { COLORS, SPACING } from "@/constants/theme";
 import { formatLocation } from "@/utils/location";
-import { UserType } from "@/types/schema";
-
-interface FilterState {
-  userType: UserType | "all";
-  city: string;
-  state: string;
-}
 
 interface UserProfile {
   _id: string;
   username: string;
-  userType: UserType;
+  userType: "individual" | "gym" | "brand";
   location?: {
     city?: string;
     state?: string;
-    country?: string;
   };
-  profile?: any;
+  avatarUrl?: string;
+  bio?: string;
 }
 
 export default function ExploreScreen() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState<FilterState>({
-    userType: "all",
-    city: "",
-    state: "",
-  });
-  const [showFilters, setShowFilters] = useState(false);
-  const [activeTab, setActiveTab] = useState<"search" | "suggestions">(
-    "search"
-  );
+  const router = useRouter();
 
   // Search query
   const searchResults = useQuery(
@@ -52,22 +39,6 @@ export default function ExploreScreen() {
     searchTerm.length > 0
       ? {
           searchTerm,
-          userType: filters.userType === "all" ? undefined : filters.userType,
-          city: filters.city || undefined,
-          state: filters.state || undefined,
-          limit: 20,
-        }
-      : "skip"
-  );
-
-  // All users query (for when no search term)
-  const allUsers = useQuery(
-    api.explore.getAllUsers,
-    searchTerm.length === 0
-      ? {
-          userType: filters.userType === "all" ? undefined : filters.userType,
-          city: filters.city || undefined,
-          state: filters.state || undefined,
           limit: 20,
         }
       : "skip"
@@ -75,83 +46,51 @@ export default function ExploreScreen() {
 
   // Location-based suggestions
   const nearbyIndividuals = useQuery(api.explore.getNearbyIndividuals, {
-    limit: 10,
+    limit: 3,
   });
 
   const nearbyGyms = useQuery(api.explore.getNearbyGyms, {
-    limit: 8,
+    limit: 3,
   });
 
   const nearbyBrands = useQuery(api.explore.getNearbyBrands, {
-    limit: 6,
+    limit: 3,
   });
 
-  // Dropdown data
-  const uniqueStates = useQuery(api.explore.getUniqueStates);
-  const uniqueCities = useQuery(
-    api.explore.getUniqueCities,
-    filters.state ? { state: filters.state } : {}
-  );
-
-  const handleClearFilters = () => {
-    setFilters({
-      userType: "all",
-      city: "",
-      state: "",
-    });
-  };
-
-  const hasActiveFilters =
-    filters.userType !== "all" || filters.city || filters.state;
-
-  const displayResults = searchTerm.length > 0 ? searchResults : allUsers;
+  const displayResults = searchResults;
 
   const renderUserCard = (user: UserProfile) => (
-    <TouchableOpacity key={user._id} style={styles.userCard}>
-      <View style={styles.userInfo}>
-        <View style={styles.userHeader}>
-          <View style={styles.userDetails}>
-            <Text style={styles.username}>@{user.username}</Text>
-            <View style={styles.userTypeContainer}>
-              <Text style={styles.userType}>
-                {user.userType.charAt(0).toUpperCase() + user.userType.slice(1)}
-              </Text>
-            </View>
-          </View>
-          {user.location && (
-            <View style={styles.locationContainer}>
-              <Ionicons
-                name="location-outline"
-                size={14}
-                color={COLORS.darkGray}
-              />
-              <Text style={styles.locationText}>
-                {formatLocation(user.location)}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {user.profile && (
-          <View style={styles.profileInfo}>
-            {user.userType === "individual" && user.profile.fullName && (
-              <Text style={styles.profileDetail}>{user.profile.fullName}</Text>
-            )}
-            {user.userType === "gym" && user.profile.gymName && (
-              <Text style={styles.profileDetail}>{user.profile.gymName}</Text>
-            )}
-            {user.userType === "brand" && user.profile.companyName && (
-              <Text style={styles.profileDetail}>
-                {user.profile.companyName}
-              </Text>
-            )}
+    <TouchableOpacity
+      key={user._id}
+      style={styles.userCard}
+      onPress={() => router.push(`/user/${user.username}`)}
+    >
+      <View style={styles.userAvatar}>
+        {user.avatarUrl ? (
+          <Image source={{ uri: user.avatarUrl }} style={styles.avatarImage} />
+        ) : (
+          <View style={styles.avatarPlaceholder}>
+            <Ionicons name="person" size={20} color={COLORS.textSecondary} />
           </View>
         )}
       </View>
+      <View style={styles.userInfo}>
+        <Text style={styles.userName}>@{user.username}</Text>
+        <Text style={styles.userType}>
+          {user.userType.charAt(0).toUpperCase() + user.userType.slice(1)}
+        </Text>
+        {user.bio && <Text style={styles.userBio}>{user.bio}</Text>}
+        {user.location && (
+          <Text style={styles.userLocation}>
+            {formatLocation(user.location)}
+          </Text>
+        )}
+      </View>
+      <Ionicons name="chevron-forward" size={16} color={COLORS.textSecondary} />
     </TouchableOpacity>
   );
 
-  const renderSuggestionSection = (
+  const renderSuggestionRow = (
     title: string,
     users: UserProfile[] | undefined,
     icon: string
@@ -161,22 +100,38 @@ export default function ExploreScreen() {
     return (
       <View style={styles.suggestionSection}>
         <View style={styles.sectionHeader}>
-          <Ionicons name={icon as any} size={20} color={COLORS.secondary} />
+          {/* <Ionicons name={icon as any} size={20} color={COLORS.secondary} /> */}
           <Text style={styles.sectionTitle}>{title}</Text>
         </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.horizontalScroll}
+          contentContainerStyle={styles.horizontalScroll}
         >
           {users.map((user) => (
-            <TouchableOpacity key={user._id} style={styles.suggestionCard}>
+            <TouchableOpacity
+              key={user._id}
+              style={styles.suggestionItem}
+              onPress={() => router.push(`/user/${user.username}`)}
+            >
+              <View style={styles.suggestionAvatar}>
+                {user.avatarUrl ? (
+                  <Image
+                    source={{ uri: user.avatarUrl }}
+                    style={styles.suggestionAvatarImage}
+                  />
+                ) : (
+                  <View style={styles.suggestionAvatarPlaceholder}>
+                    <Ionicons
+                      name="person"
+                      size={32}
+                      color={COLORS.textSecondary}
+                    />
+                  </View>
+                )}
+              </View>
               <Text style={styles.suggestionUsername}>@{user.username}</Text>
-              {user.location && (
-                <Text style={styles.suggestionLocation}>
-                  {formatLocation(user.location)}
-                </Text>
-              )}
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -186,17 +141,12 @@ export default function ExploreScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Explore</Text>
-      </View>
-
       {/* Search Bar */}
       <View style={styles.searchSection}>
         <View style={styles.searchContainer}>
           <Ionicons name="search" size={20} color={COLORS.darkGray} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput]}
             placeholder="Search by username..."
             value={searchTerm}
             onChangeText={setSearchTerm}
@@ -208,188 +158,12 @@ export default function ExploreScreen() {
             </TouchableOpacity>
           )}
         </View>
-
-        {/* Filter Toggle */}
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            hasActiveFilters && styles.filterButtonActive,
-          ]}
-          onPress={() => setShowFilters(!showFilters)}
-        >
-          <Ionicons
-            name="filter"
-            size={20}
-            color={hasActiveFilters ? COLORS.white : COLORS.darkGray}
-          />
-        </TouchableOpacity>
-      </View>
-
-      {/* Filters */}
-      {showFilters && (
-        <View style={styles.filtersContainer}>
-          {/* User Type Filter */}
-          <View style={styles.filterRow}>
-            <Text style={styles.filterLabel}>Type:</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {["all", "individual", "gym", "brand"].map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={[
-                    styles.filterChip,
-                    filters.userType === type && styles.filterChipActive,
-                  ]}
-                  onPress={() =>
-                    setFilters((prev) => ({ ...prev, userType: type as any }))
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.filterChipText,
-                      filters.userType === type && styles.filterChipTextActive,
-                    ]}
-                  >
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          {/* Location Filters */}
-          <View style={styles.filterRow}>
-            <Text style={styles.filterLabel}>State:</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <TouchableOpacity
-                style={[
-                  styles.filterChip,
-                  !filters.state && styles.filterChipActive,
-                ]}
-                onPress={() =>
-                  setFilters((prev) => ({ ...prev, state: "", city: "" }))
-                }
-              >
-                <Text
-                  style={[
-                    styles.filterChipText,
-                    !filters.state && styles.filterChipTextActive,
-                  ]}
-                >
-                  All States
-                </Text>
-              </TouchableOpacity>
-              {uniqueStates?.map((state: string) => (
-                <TouchableOpacity
-                  key={state}
-                  style={[
-                    styles.filterChip,
-                    filters.state === state && styles.filterChipActive,
-                  ]}
-                  onPress={() =>
-                    setFilters((prev) => ({ ...prev, state, city: "" }))
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.filterChipText,
-                      filters.state === state && styles.filterChipTextActive,
-                    ]}
-                  >
-                    {state}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          {filters.state && (
-            <View style={styles.filterRow}>
-              <Text style={styles.filterLabel}>City:</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <TouchableOpacity
-                  style={[
-                    styles.filterChip,
-                    !filters.city && styles.filterChipActive,
-                  ]}
-                  onPress={() => setFilters((prev) => ({ ...prev, city: "" }))}
-                >
-                  <Text
-                    style={[
-                      styles.filterChipText,
-                      !filters.city && styles.filterChipTextActive,
-                    ]}
-                  >
-                    All Cities
-                  </Text>
-                </TouchableOpacity>
-                {uniqueCities?.map((city: string) => (
-                  <TouchableOpacity
-                    key={city}
-                    style={[
-                      styles.filterChip,
-                      filters.city === city && styles.filterChipActive,
-                    ]}
-                    onPress={() => setFilters((prev) => ({ ...prev, city }))}
-                  >
-                    <Text
-                      style={[
-                        styles.filterChipText,
-                        filters.city === city && styles.filterChipTextActive,
-                      ]}
-                    >
-                      {city}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          )}
-
-          {/* Clear Filters */}
-          {hasActiveFilters && (
-            <TouchableOpacity
-              style={styles.clearFiltersButton}
-              onPress={handleClearFilters}
-            >
-              <Text style={styles.clearFiltersText}>Clear Filters</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
-
-      {/* Tab Navigation */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "search" && styles.activeTab]}
-          onPress={() => setActiveTab("search")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "search" && styles.activeTabText,
-            ]}
-          >
-            {searchTerm ? "Search Results" : "Browse"}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === "suggestions" && styles.activeTab]}
-          onPress={() => setActiveTab("suggestions")}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "suggestions" && styles.activeTabText,
-            ]}
-          >
-            Suggestions
-          </Text>
-        </TouchableOpacity>
       </View>
 
       {/* Content */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {activeTab === "search" ? (
+        {searchTerm.length > 0 ? (
+          // Search Results (LinkedIn style)
           <View style={styles.searchResults}>
             {displayResults === undefined ? (
               <ActivityIndicator
@@ -400,17 +174,13 @@ export default function ExploreScreen() {
             ) : displayResults.length === 0 ? (
               <View style={styles.emptyState}>
                 <Ionicons
-                  name="search-outline"
-                  size={64}
-                  color={COLORS.lightGray}
+                  name="search"
+                  size={48}
+                  color={COLORS.textSecondary}
                 />
-                <Text style={styles.emptyStateTitle}>
-                  {searchTerm ? "No results found" : "No users found"}
-                </Text>
-                <Text style={styles.emptyStateText}>
-                  {searchTerm
-                    ? "Try adjusting your search terms or filters"
-                    : "Try changing your filters"}
+                <Text style={styles.emptyStateText}>No users found</Text>
+                <Text style={styles.emptyStateSubtext}>
+                  Try adjusting your search terms
                 </Text>
               </View>
             ) : (
@@ -418,22 +188,15 @@ export default function ExploreScreen() {
             )}
           </View>
         ) : (
+          // Suggestions (Instagram style)
           <View style={styles.suggestions}>
-            {renderSuggestionSection(
+            {renderSuggestionRow(
               "People Near You",
               nearbyIndividuals,
-              "people-outline"
+              "person"
             )}
-            {renderSuggestionSection(
-              "Gyms Near You",
-              nearbyGyms,
-              "fitness-outline"
-            )}
-            {renderSuggestionSection(
-              "Brands Near You",
-              nearbyBrands,
-              "business-outline"
-            )}
+            {renderSuggestionRow("Gyms Near You", nearbyGyms, "fitness")}
+            {renderSuggestionRow("Brands Near You", nearbyBrands, "business")}
           </View>
         )}
       </ScrollView>
@@ -446,21 +209,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: COLORS.text,
-  },
   searchSection: {
     flexDirection: "row",
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 8,
     gap: 12,
   },
   searchContainer: {
@@ -470,99 +222,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 4,
     gap: 12,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
     color: COLORS.text,
-  },
-  filterButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: COLORS.background,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  filterButtonActive: {
-    backgroundColor: COLORS.secondary,
-  },
-  filtersContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  filterRow: {
-    marginBottom: 12,
-  },
-  filterLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: COLORS.text,
-    marginBottom: 8,
-  },
-  filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: COLORS.background,
-    borderRadius: 20,
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  filterChipActive: {
-    backgroundColor: COLORS.secondary,
-    borderColor: COLORS.secondary,
-  },
-  filterChipText: {
-    fontSize: 14,
-    color: COLORS.text,
-  },
-  filterChipTextActive: {
-    color: COLORS.white,
-    fontWeight: "600",
-  },
-  clearFiltersButton: {
-    alignSelf: "flex-start",
-    paddingVertical: 8,
-  },
-  clearFiltersText: {
-    fontSize: 14,
-    color: COLORS.secondary,
-    fontWeight: "600",
-  },
-  tabContainer: {
-    flexDirection: "row",
-    backgroundColor: COLORS.background,
-    marginHorizontal: 20,
-    borderRadius: 12,
-    padding: 4,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: "center",
-    borderRadius: 8,
-  },
-  activeTab: {
-    backgroundColor: COLORS.white,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.darkGray,
-  },
-  activeTabText: {
-    color: COLORS.text,
-    fontWeight: "600",
   },
   content: {
     flex: 1,
@@ -572,58 +238,59 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   userCard: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
+    gap: 12,
+  },
+  userAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    overflow: "hidden",
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+  },
+  avatarPlaceholder: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: COLORS.background,
+    alignItems: "center",
+    justifyContent: "center",
   },
   userInfo: {
-    gap: 8,
-  },
-  userHeader: {
+    flex: 1,
     gap: 4,
   },
-  userDetails: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  username: {
+  userName: {
     fontSize: 16,
     fontWeight: "600",
     color: COLORS.text,
   },
-  userTypeContainer: {
-    backgroundColor: COLORS.secondary,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
   userType: {
-    fontSize: 12,
+    fontSize: 14,
+    color: COLORS.secondary,
     fontWeight: "500",
-    color: COLORS.white,
   },
-  locationContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  locationText: {
+  userBio: {
     fontSize: 14,
     color: COLORS.darkGray,
+    lineHeight: 18,
   },
-  profileInfo: {
-    marginTop: 4,
-  },
-  profileDetail: {
-    fontSize: 14,
+  userLocation: {
+    fontSize: 12,
     color: COLORS.darkGray,
   },
   suggestions: {
-    gap: 24,
+    display: "flex",
+    gap: SPACING.xl,
   },
   suggestionSection: {
     paddingHorizontal: 20,
@@ -632,7 +299,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 18,
@@ -643,37 +310,50 @@ const styles = StyleSheet.create({
     marginHorizontal: -20,
     paddingHorizontal: 20,
   },
-  suggestionCard: {
+  suggestionItem: {
+    alignItems: "center",
+    marginRight: 20,
+    width: 80,
+  },
+  suggestionAvatar: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    overflow: "hidden",
+    marginBottom: 8,
+  },
+  suggestionAvatarImage: {
+    width: "100%",
+    height: "100%",
+  },
+  suggestionAvatarPlaceholder: {
+    width: "100%",
+    height: "100%",
     backgroundColor: COLORS.background,
-    borderRadius: 12,
-    padding: 12,
-    marginRight: 12,
-    minWidth: 140,
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1,
     borderColor: COLORS.border,
   },
   suggestionUsername: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  suggestionLocation: {
     fontSize: 12,
-    color: COLORS.darkGray,
+    fontWeight: "500",
+    color: COLORS.text,
+    textAlign: "center",
+    lineHeight: 16,
   },
   emptyState: {
     alignItems: "center",
     paddingVertical: 60,
   },
-  emptyStateTitle: {
+  emptyStateText: {
     fontSize: 18,
     fontWeight: "600",
     color: COLORS.text,
     marginTop: 16,
     marginBottom: 8,
   },
-  emptyStateText: {
+  emptyStateSubtext: {
     fontSize: 14,
     color: COLORS.darkGray,
     textAlign: "center",

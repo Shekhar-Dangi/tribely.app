@@ -73,7 +73,7 @@ export default function DataTab({
 
       {/* Stats Section */}
       {stats && (
-        <View style={profile.statsContainer}>
+        <View style={profile.dataCard}>
           <Text style={profile.sectionHeader}>Physical Stats</Text>
           <View style={profile.statsRow}>
             <View style={profile.statItem}>
