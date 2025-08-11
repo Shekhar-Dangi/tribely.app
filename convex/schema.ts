@@ -599,6 +599,43 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_key", ["key"]),
 
+  // ──────── ACTIVITY TRANSACTIONS (Score History) ────────
+  activityTransactions: defineTable({
+    userId: v.id("users"),
+    activityType: v.union(
+      v.literal("workout_posted"),
+      v.literal("event_created"),
+      v.literal("event_joined"),
+      v.literal("follower_gained"),
+      v.literal("profile_completed"),
+      v.literal("weekly_streak"),
+      v.literal("monthly_milestone"),
+      v.literal("community_interaction"),
+      v.literal("achievement_unlocked"),
+      v.literal("manual_adjustment") // for admin adjustments
+    ),
+    pointsEarned: v.number(), // can be positive or negative
+    description: v.string(), // "Posted a new workout", "Joined Morning Yoga Event"
+
+    // Optional metadata for context
+    relatedId: v.optional(v.string()), // eventId, workoutId, etc.
+    metadata: v.optional(
+      v.object({
+        eventName: v.optional(v.string()),
+        workoutType: v.optional(v.string()),
+        achievementName: v.optional(v.string()),
+        streakDays: v.optional(v.number()),
+      })
+    ),
+
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId", "createdAt"])
+    .index("by_user_recent", ["userId"])
+    .index("by_activity_type", ["activityType", "createdAt"])
+    .index("by_points", ["pointsEarned"])
+    .index("by_recent", ["createdAt"]),
+
   // For analytics and debugging
   systemLogs: defineTable({
     type: v.union(

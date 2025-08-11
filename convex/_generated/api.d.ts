@@ -22,6 +22,7 @@ import type * as follows from "../follows.js";
 import type * as gyms from "../gyms.js";
 import type * as http from "../http.js";
 import type * as individuals from "../individuals.js";
+import type * as leaderboard from "../leaderboard.js";
 import type * as posts from "../posts.js";
 import type * as testData from "../testData.js";
 import type * as users from "../users.js";
@@ -44,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   gyms: typeof gyms;
   http: typeof http;
   individuals: typeof individuals;
+  leaderboard: typeof leaderboard;
   posts: typeof posts;
   testData: typeof testData;
   users: typeof users;

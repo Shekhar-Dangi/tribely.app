@@ -8,19 +8,19 @@ import {
   Alert,
   ActivityIndicator,
   Switch,
-  Platform,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "convex/react";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { api } from "@/convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { COLORS } from "@/constants/theme";
 import { onboard, union } from "@/constants/styles";
+import { AppHeader } from "@/components/common";
 import { Id } from "@/convex/_generated/dataModel";
 
 interface CreateEventForm {
@@ -68,6 +68,12 @@ export default function CreateEvent() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
+  // Temporary input states for date/time editing
+  const [tempStartDate, setTempStartDate] = useState("");
+  const [tempStartTime, setTempStartTime] = useState("");
+  const [tempEndDate, setTempEndDate] = useState("");
+  const [tempEndTime, setTempEndTime] = useState("");
+
   const createEvent = useMutation(api.events.createEvent);
 
   const {
@@ -106,23 +112,6 @@ export default function CreateEvent() {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  const onDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    setShowEndDatePicker(false);
-    
-    if (selectedDate) {
-      if (showDatePicker) {
-        setValue("date", selectedDate);
-        // If end date is before new date, clear it
-        if (watchedEndDate && selectedDate > watchedEndDate) {
-          setValue("endDate", undefined);
-        }
-      } else if (showEndDatePicker) {
-        setValue("endDate", selectedDate);
-      }
-    }
   };
 
   const validateForm = (data: CreateEventForm): string | null => {
@@ -208,31 +197,24 @@ export default function CreateEvent() {
         date: data.date.getTime(),
         endDate: data.endDate ? data.endDate.getTime() : undefined,
         location: data.location?.trim() || undefined,
-        maxParticipants: data.maxParticipants?.trim() 
-          ? parseInt(data.maxParticipants.trim()) 
+        maxParticipants: data.maxParticipants?.trim()
+          ? parseInt(data.maxParticipants.trim())
           : undefined,
         eventType: data.eventType,
         isPublic: data.isPublic,
       };
 
       await createEvent(eventData);
-      
-      Alert.alert(
-        "Success", 
-        "Event created successfully!",
-        [
-          {
-            text: "OK",
-            onPress: () => router.back(),
-          }
-        ]
-      );
+
+      Alert.alert("Success", "Event created successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
     } catch (error) {
       console.error("Error creating event:", error);
-      Alert.alert(
-        "Error", 
-        "Failed to create event. Please try again."
-      );
+      Alert.alert("Error", "Failed to create event. Please try again.");
     } finally {
       setIsCreating(false);
     }
@@ -249,17 +231,17 @@ export default function CreateEvent() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-          <Ionicons name="chevron-back" size={24} color={COLORS.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Create Event</Text>
-        <View style={styles.placeholder} />
-      </View>
+    <View style={styles.container}>
+      <AppHeader
+        title="Create Event"
+        showBackButton={true}
+        onBackPress={handleBackPress}
+      />
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Event Type Selection */}
         <View style={onboard.wideCard}>
           <Text style={onboard.cardTitle}>Event Type</Text>
@@ -269,7 +251,8 @@ export default function CreateEvent() {
                 key={type.value}
                 style={[
                   styles.eventTypeCard,
-                  watchedEventType === type.value && styles.eventTypeCardSelected,
+                  watchedEventType === type.value &&
+                    styles.eventTypeCardSelected,
                 ]}
                 onPress={() => setValue("eventType", type.value)}
               >
@@ -277,7 +260,8 @@ export default function CreateEvent() {
                   <View
                     style={[
                       styles.eventTypeIcon,
-                      watchedEventType === type.value && styles.eventTypeIconSelected,
+                      watchedEventType === type.value &&
+                        styles.eventTypeIconSelected,
                     ]}
                   >
                     <Ionicons
@@ -378,7 +362,9 @@ export default function CreateEvent() {
                   {value.length}/1000 characters
                 </Text>
                 {errors.description && (
-                  <Text style={styles.errorText}>{errors.description.message}</Text>
+                  <Text style={styles.errorText}>
+                    {errors.description.message}
+                  </Text>
                 )}
               </View>
             )}
@@ -413,7 +399,9 @@ export default function CreateEvent() {
                   maxLength={200}
                 />
                 {errors.location && (
-                  <Text style={styles.errorText}>{errors.location.message}</Text>
+                  <Text style={styles.errorText}>
+                    {errors.location.message}
+                  </Text>
                 )}
               </View>
             )}
@@ -456,9 +444,16 @@ export default function CreateEvent() {
             <Text style={union.textInputLabel}>Start Date & Time *</Text>
             <TouchableOpacity
               style={styles.dateTimeButton}
-              onPress={() => setShowDatePicker(true)}
+              onPress={() => {
+                setShowDatePicker(true);
+                setShowEndDatePicker(false);
+              }}
             >
-              <Ionicons name="calendar-outline" size={20} color={COLORS.secondary} />
+              <Ionicons
+                name="calendar-outline"
+                size={20}
+                color={COLORS.secondary}
+              />
               <Text style={styles.dateTimeText}>
                 {formatDateTime(watchedDate)}
               </Text>
@@ -470,9 +465,16 @@ export default function CreateEvent() {
             <Text style={union.textInputLabel}>End Date & Time</Text>
             <TouchableOpacity
               style={styles.dateTimeButton}
-              onPress={() => setShowEndDatePicker(true)}
+              onPress={() => {
+                setShowEndDatePicker(true);
+                setShowDatePicker(false);
+              }}
             >
-              <Ionicons name="calendar-outline" size={20} color={COLORS.secondary} />
+              <Ionicons
+                name="calendar-outline"
+                size={20}
+                color={COLORS.secondary}
+              />
               <Text style={styles.dateTimeText}>
                 {watchedEndDate ? formatDateTime(watchedEndDate) : "Optional"}
               </Text>
@@ -491,7 +493,7 @@ export default function CreateEvent() {
         {/* Privacy Settings */}
         <View style={onboard.wideCard}>
           <Text style={onboard.cardTitle}>Privacy & Visibility</Text>
-          
+
           <Controller
             control={control}
             name="isPublic"
@@ -500,7 +502,7 @@ export default function CreateEvent() {
                 <View style={styles.switchTextContainer}>
                   <Text style={styles.switchLabel}>Public Event</Text>
                   <Text style={styles.switchDescription}>
-                    {value 
+                    {value
                       ? "Anyone can discover and join this event"
                       : "Only people you share the link with can join"}
                   </Text>
@@ -508,7 +510,10 @@ export default function CreateEvent() {
                 <Switch
                   value={value}
                   onValueChange={onChange}
-                  trackColor={{ false: COLORS.lightGray, true: COLORS.secondary }}
+                  trackColor={{
+                    false: COLORS.lightGray,
+                    true: COLORS.secondary,
+                  }}
                   thumbColor={COLORS.white}
                 />
               </View>
@@ -530,7 +535,11 @@ export default function CreateEvent() {
               <ActivityIndicator size="small" color={COLORS.white} />
             ) : (
               <>
-                <Ionicons name="add-circle-outline" size={20} color={COLORS.white} />
+                <Ionicons
+                  name="add-circle-outline"
+                  size={20}
+                  color={COLORS.white}
+                />
                 <Text style={[union.buttonText, { marginLeft: 8 }]}>
                   Create Event
                 </Text>
@@ -540,24 +549,187 @@ export default function CreateEvent() {
         </View>
       </ScrollView>
 
-      {/* Date Picker */}
-      {(showDatePicker || showEndDatePicker) && (
-        <DateTimePicker
-          value={showDatePicker ? watchedDate : (watchedEndDate || new Date())}
-          mode="datetime"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          onChange={onDateChange}
-          minimumDate={showDatePicker ? new Date() : watchedDate}
-        />
+      {/* Date Picker Modal */}
+      {showDatePicker && (
+        <Modal
+          transparent={true}
+          animationType="slide"
+          visible={showDatePicker}
+          onRequestClose={() => setShowDatePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.datePickerModal}>
+              <Text style={styles.modalTitle}>Select Date & Time</Text>
+
+              {/* Date Selection */}
+              <View style={styles.dateInputContainer}>
+                <Text style={styles.inputLabel}>Date (YYYY-MM-DD)</Text>
+                <TextInput
+                  style={styles.dateInput}
+                  placeholder="2025-08-12"
+                  value={tempStartDate}
+                  onChangeText={setTempStartDate}
+                  onFocus={() => {
+                    if (!tempStartDate) {
+                      setTempStartDate(watchedDate.toISOString().split("T")[0]);
+                    }
+                  }}
+                />
+              </View>
+
+              {/* Time Selection */}
+              <View style={styles.dateInputContainer}>
+                <Text style={styles.inputLabel}>Time (HH:MM)</Text>
+                <TextInput
+                  style={styles.dateInput}
+                  placeholder="10:00"
+                  value={tempStartTime}
+                  onChangeText={setTempStartTime}
+                  onFocus={() => {
+                    if (!tempStartTime) {
+                      setTempStartTime(
+                        watchedDate.toTimeString().split(" ")[0].slice(0, 5)
+                      );
+                    }
+                  }}
+                />
+              </View>
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.modalButtonSecondary}
+                  onPress={() => {
+                    setShowDatePicker(false);
+                    setTempStartDate("");
+                    setTempStartTime("");
+                  }}
+                >
+                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => {
+                    // Parse and update the date only when user clicks Done
+                    const dateStr =
+                      tempStartDate || watchedDate.toISOString().split("T")[0];
+                    const timeStr =
+                      tempStartTime ||
+                      watchedDate.toTimeString().split(" ")[0].slice(0, 5);
+
+                    const newDate = new Date(`${dateStr}T${timeStr}`);
+                    if (!isNaN(newDate.getTime())) {
+                      setValue("date", newDate);
+                    }
+
+                    setShowDatePicker(false);
+                    setTempStartDate("");
+                    setTempStartTime("");
+                  }}
+                >
+                  <Text style={styles.modalButtonText}>Done</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       )}
-    </SafeAreaView>
+
+      {showEndDatePicker && (
+        <Modal
+          transparent={true}
+          animationType="slide"
+          visible={showEndDatePicker}
+          onRequestClose={() => setShowEndDatePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.datePickerModal}>
+              <Text style={styles.modalTitle}>Select End Date & Time</Text>
+
+              {/* Date Selection */}
+              <View style={styles.dateInputContainer}>
+                <Text style={styles.inputLabel}>Date (YYYY-MM-DD)</Text>
+                <TextInput
+                  style={styles.dateInput}
+                  placeholder="2025-08-12"
+                  value={tempEndDate}
+                  onChangeText={setTempEndDate}
+                  onFocus={() => {
+                    if (!tempEndDate) {
+                      setTempEndDate(
+                        watchedEndDate?.toISOString().split("T")[0] ||
+                          watchedDate.toISOString().split("T")[0]
+                      );
+                    }
+                  }}
+                />
+              </View>
+
+              {/* Time Selection */}
+              <View style={styles.dateInputContainer}>
+                <Text style={styles.inputLabel}>Time (HH:MM)</Text>
+                <TextInput
+                  style={styles.dateInput}
+                  placeholder="12:00"
+                  value={tempEndTime}
+                  onChangeText={setTempEndTime}
+                  onFocus={() => {
+                    if (!tempEndTime) {
+                      const baseDate = watchedEndDate || watchedDate;
+                      setTempEndTime(
+                        baseDate.toTimeString().split(" ")[0].slice(0, 5)
+                      );
+                    }
+                  }}
+                />
+              </View>
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.modalButtonSecondary}
+                  onPress={() => {
+                    setShowEndDatePicker(false);
+                    setTempEndDate("");
+                    setTempEndTime("");
+                  }}
+                >
+                  <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => {
+                    // Parse and update the end date only when user clicks Done
+                    const baseDate = watchedEndDate || watchedDate;
+                    const dateStr =
+                      tempEndDate || baseDate.toISOString().split("T")[0];
+                    const timeStr =
+                      tempEndTime ||
+                      baseDate.toTimeString().split(" ")[0].slice(0, 5);
+
+                    const newDate = new Date(`${dateStr}T${timeStr}`);
+                    if (!isNaN(newDate.getTime())) {
+                      setValue("endDate", newDate);
+                    }
+
+                    setShowEndDatePicker(false);
+                    setTempEndDate("");
+                    setTempEndTime("");
+                  }}
+                >
+                  <Text style={styles.modalButtonText}>Done</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+    </View>
   );
 }
 
 const styles = {
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.background,
   },
   loadingContainer: {
     flex: 1,
@@ -567,29 +739,6 @@ const styles = {
   loadingText: {
     fontSize: 16,
     color: COLORS.textMuted,
-  },
-  header: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    justifyContent: "space-between" as const,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: COLORS.primary,
-  },
-  placeholder: {
-    width: 40,
   },
   scrollView: {
     flex: 1,
@@ -706,5 +855,85 @@ const styles = {
   },
   buttonDisabled: {
     backgroundColor: COLORS.lightGray,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+  },
+  datePickerModal: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 24,
+    margin: 20,
+    alignItems: "center" as const,
+    maxWidth: 400,
+    width: "90%" as const,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600" as const,
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    textAlign: "center" as const,
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: COLORS.secondary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: "center" as const,
+  },
+  modalButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: "600" as const,
+  },
+  dateInputContainer: {
+    marginBottom: 16,
+    width: "100%" as const,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "500" as const,
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  dateInput: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    color: COLORS.text,
+    backgroundColor: COLORS.white,
+  },
+  modalButtons: {
+    flexDirection: "row" as const,
+    gap: 12,
+    marginTop: 8,
+  },
+  modalButtonSecondary: {
+    backgroundColor: COLORS.background,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    flex: 1,
+    alignItems: "center" as const,
+  },
+  modalButtonSecondaryText: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "600" as const,
   },
 };

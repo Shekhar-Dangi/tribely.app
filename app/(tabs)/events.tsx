@@ -4,7 +4,7 @@ import { useQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import { api } from "@/convex/_generated/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import EventsHeader from "@/components/events/EventsHeader";
+import { AppHeader } from "@/components/common";
 import EventCard from "@/components/events/EventCard";
 import EventSkeleton from "@/components/events/EventSkeleton";
 import { COLORS, SPACING } from "@/constants/theme";
@@ -54,9 +54,12 @@ export default function Events() {
   if (!currentUser) {
     return (
       <View style={styles.container}>
-        <EventsHeader
-          onCreateEventPress={handleCreateEvent}
-          onMyEventsPress={handleMyEvents}
+        <AppHeader
+          title="Events"
+          leftIcon="list-outline"
+          onLeftPress={handleMyEvents}
+          rightIcon="add"
+          onRightPress={handleCreateEvent}
         />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Loading...</Text>
@@ -67,9 +70,12 @@ export default function Events() {
 
   return (
     <View style={styles.container}>
-      <EventsHeader
-        onCreateEventPress={handleCreateEvent}
-        onMyEventsPress={handleMyEvents}
+      <AppHeader
+        title="Events"
+        leftIcon="list-outline"
+        onLeftPress={handleMyEvents}
+        rightIcon="add"
+        onRightPress={handleCreateEvent}
       />
 
       <ScrollView

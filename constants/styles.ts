@@ -195,11 +195,11 @@ export const profile = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
-    padding: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
     // paddingTop: 120,
     // marginTop: 100,
-    borderTopColor: COLORS.mediumGray,
-    borderWidth: 1,
+    // borderTopColor: COLORS.mediumGray,
+    // borderWidth: 1,
   },
 
   // Profile Header
@@ -488,24 +488,39 @@ export const profile = StyleSheet.create({
 
 export const editProfile = StyleSheet.create({
   // Header styles
+  safeArea: {
+    backgroundColor: COLORS.white,
+  },
   header: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
-    paddingBottom: SPACING.md,
+    paddingBottom: 8,
+    marginBottom: SPACING.md,
+    backgroundColor: COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: COLORS.text,
+    textAlign: "center",
+    flex: 1,
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 22,
+    backgroundColor: COLORS.background,
   },
   backButton: {
     width: 40,
     height: 40,
     alignItems: "center",
     justifyContent: "center",
-  },
-  headerTitle: {
-    fontSize: FONTS.sizes.lg,
-    ...FONTS.bold,
-    color: COLORS.text,
   },
   saveButton: {
     backgroundColor: COLORS.secondary,

@@ -8,12 +8,12 @@ import {
   Image,
   Alert,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useUser } from "@clerk/clerk-expo";
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCloudinaryUpload } from "@/hooks/useCloudinaryUpload";
+import { AppHeader } from "@/components/common";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import * as ImagePicker from "expo-image-picker";
@@ -280,47 +280,56 @@ export default function Create() {
     </View>
   );
 
+  // Post button component for header
+  const PostButton = () => (
+    <TouchableOpacity
+      style={[
+        styles.postButton,
+        (activePostType === "text" && textContent.trim().length === 0) ||
+        ((activePostType === "image" || activePostType === "video") &&
+          !selectedMedia) ||
+        isUploading
+          ? styles.postButtonDisabled
+          : styles.postButtonEnabled,
+      ]}
+      onPress={handlePost}
+      disabled={
+        (activePostType === "text" && textContent.trim().length === 0) ||
+        ((activePostType === "image" || activePostType === "video") &&
+          !selectedMedia) ||
+        isUploading
+      }
+    >
+      <Text
+        style={[
+          styles.postButtonText,
+          (activePostType === "text" && textContent.trim().length === 0) ||
+          ((activePostType === "image" || activePostType === "video") &&
+            !selectedMedia) ||
+          isUploading
+            ? styles.postButtonTextDisabled
+            : styles.postButtonTextEnabled,
+        ]}
+      >
+        {isUploading ? "Posting..." : "Post"}
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleCancel}>
-          <Text style={styles.cancelButton}>Cancel</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Create Post</Text>
-        <TouchableOpacity
-          style={[
-            styles.postButton,
-            (activePostType === "text" && textContent.trim().length === 0) ||
-            ((activePostType === "image" || activePostType === "video") &&
-              !selectedMedia) ||
-            isUploading
-              ? styles.postButtonDisabled
-              : styles.postButtonEnabled,
-          ]}
-          onPress={handlePost}
-          disabled={
-            (activePostType === "text" && textContent.trim().length === 0) ||
-            ((activePostType === "image" || activePostType === "video") &&
-              !selectedMedia) ||
-            isUploading
-          }
-        >
-          <Text
-            style={[
-              styles.postButtonText,
-              (activePostType === "text" && textContent.trim().length === 0) ||
-              ((activePostType === "image" || activePostType === "video") &&
-                !selectedMedia) ||
-              isUploading
-                ? styles.postButtonTextDisabled
-                : styles.postButtonTextEnabled,
-            ]}
+    <View style={styles.container}>
+      <AppHeader
+        title="Create Post"
+        leftComponent={
+          <TouchableOpacity
+            onPress={handleCancel}
+            style={{ paddingHorizontal: 12, paddingVertical: 12 }}
           >
-            {isUploading ? `Uploading ${progress}%` : "Post"}
-          </Text>
-        </TouchableOpacity>
-      </View>
+            <Text style={styles.cancelButton}>Cancel</Text>
+          </TouchableOpacity>
+        }
+        rightComponent={<PostButton />}
+      />
 
       {/* Post Type Tabs */}
       <View style={styles.postTypeTabs}>
@@ -358,7 +367,7 @@ export default function Create() {
         {/* Content Input */}
         {activePostType === "text" ? renderTextPost() : renderMediaPost()}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

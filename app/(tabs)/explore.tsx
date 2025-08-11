@@ -9,13 +9,13 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import { api } from "@/convex/_generated/api";
 import { COLORS, SPACING } from "@/constants/theme";
 import { formatLocation } from "@/utils/location";
+import { AppHeader } from "@/components/common";
 
 interface UserProfile {
   _id: string;
@@ -140,7 +140,9 @@ export default function ExploreScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <AppHeader title="Explore" leftIcon="search" rightIcon="filter" />
+
       {/* Search Bar */}
       <View style={styles.searchSection}>
         <View style={styles.searchContainer}>
@@ -200,7 +202,7 @@ export default function ExploreScreen() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

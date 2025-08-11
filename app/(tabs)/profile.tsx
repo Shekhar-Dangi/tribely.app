@@ -9,7 +9,7 @@ import DataTab from "@/components/profile/DataTab";
 import BrandDataTab from "@/components/profile/BrandDataTab";
 import GymDataTab from "@/components/profile/GymDataTab";
 import PostsTab from "@/components/posts/PostsTab";
-import ProfileHeader from "@/components/profile/ProfileHeader";
+import { AppHeader } from "@/components/common";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   isIndividualProfile,
@@ -121,123 +121,128 @@ export default function Profile() {
   }
 
   return (
-    <View style={profile.container}>
-      <ProfileHeader
-        onNotificationsPress={handleNotifications}
-        onMessagesPress={handleMessages}
+    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
+      <AppHeader
+        title="Profile"
+        leftIcon="notifications-outline"
+        onLeftPress={handleNotifications}
+        rightIcon="chatbubble-outline"
+        onRightPress={handleMessages}
       />
-      <View style={profile.profileHeader}>
-        <View style={profile.avatarContainer}>
-          <Image
-            source={
-              userData.avatarUrl
-                ? { uri: userData.avatarUrl }
-                : require("@/assets/images/logo.png")
-            }
-            style={profile.avatar}
-          />
+      <View style={profile.container}>
+        <View style={profile.profileHeader}>
+          <View style={profile.avatarContainer}>
+            <Image
+              source={
+                userData.avatarUrl
+                  ? { uri: userData.avatarUrl }
+                  : require("@/assets/images/logo.png")
+              }
+              style={profile.avatar}
+            />
+          </View>
+          <View style={profile.statsContainer}>
+            <TouchableOpacity style={profile.statItem}>
+              <Text style={profile.statNumber}>
+                {userData.followerCount || 0}
+              </Text>
+              <Text style={profile.statLabel}>Followers</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={profile.statItem}>
+              <Text style={profile.statNumber}>
+                {userData.followingCount || 0}
+              </Text>
+              <Text style={profile.statLabel}>Following</Text>
+            </TouchableOpacity>
+            {userData.userType === "individual" &&
+              userData.profile &&
+              isIndividualProfile(userData.profile) && (
+                <TouchableOpacity style={profile.statItem}>
+                  <Text style={profile.statNumber}>
+                    {userData.profile.activityScore || 0}
+                  </Text>
+                  <Text style={profile.statLabel}>Eval</Text>
+                </TouchableOpacity>
+              )}
+          </View>
         </View>
-        <View style={profile.statsContainer}>
-          <TouchableOpacity style={profile.statItem}>
-            <Text style={profile.statNumber}>
-              {userData.followerCount || 0}
-            </Text>
-            <Text style={profile.statLabel}>Followers</Text>
+        <View style={profile.userInfo}>
+          <Text style={profile.userName}>{user?.fullName}</Text>
+          {/* <Text style={profile.userHandle}>@{userData.username}</Text> */}
+          <Text style={profile.userType}>{userData.bio}</Text>
+        </View>
+        {/* Stats Section - Instagram style */}
+
+        <View style={profile.actionButtons}>
+          <TouchableOpacity style={profile.primaryButton} onPress={handleEdit}>
+            <Text style={profile.primaryButtonText}>Edit</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={profile.statItem}>
-            <Text style={profile.statNumber}>
-              {userData.followingCount || 0}
-            </Text>
-            <Text style={profile.statLabel}>Following</Text>
+          <TouchableOpacity
+            style={profile.secondaryButton}
+            onPress={handleSettings}
+          >
+            <Text style={profile.secondaryButtonText}>Settings</Text>
           </TouchableOpacity>
-          {userData.userType === "individual" &&
-            userData.profile &&
-            isIndividualProfile(userData.profile) && (
-              <TouchableOpacity style={profile.statItem}>
-                <Text style={profile.statNumber}>
-                  {userData.profile.activityScore || 0}
-                </Text>
-                <Text style={profile.statLabel}>Eval</Text>
-              </TouchableOpacity>
-            )}
         </View>
-      </View>
-      <View style={profile.userInfo}>
-        <Text style={profile.userName}>{user?.fullName}</Text>
-        {/* <Text style={profile.userHandle}>@{userData.username}</Text> */}
-        <Text style={profile.userType}>{userData.bio}</Text>
-      </View>
-      {/* Stats Section - Instagram style */}
-
-      <View style={profile.actionButtons}>
-        <TouchableOpacity style={profile.primaryButton} onPress={handleEdit}>
-          <Text style={profile.primaryButtonText}>Edit</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={profile.secondaryButton}
-          onPress={handleSettings}
-        >
-          <Text style={profile.secondaryButtonText}>Settings</Text>
-        </TouchableOpacity>
-      </View>
-      {/* Tab Navigation */}
-      <View style={profile.tabContainer}>
-        <TouchableOpacity
-          style={[
-            profile.tab,
-            activeTab === "data" && { borderBottomColor: COLORS.primary },
-          ]}
-          onPress={() => setActiveTab("data")}
-        >
-          <Text
+        {/* Tab Navigation */}
+        <View style={profile.tabContainer}>
+          <TouchableOpacity
             style={[
-              profile.tabText,
-              activeTab === "data" && { color: COLORS.primary },
+              profile.tab,
+              activeTab === "data" && { borderBottomColor: COLORS.primary },
             ]}
+            onPress={() => setActiveTab("data")}
           >
-            Data
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={[
+                profile.tabText,
+                activeTab === "data" && { color: COLORS.primary },
+              ]}
+            >
+              Data
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            profile.tab,
-            activeTab === "posts" && { borderBottomColor: COLORS.primary },
-          ]}
-          onPress={() => setActiveTab("posts")}
-        >
-          <Text
+          <TouchableOpacity
             style={[
-              profile.tabText,
-              activeTab === "posts" && { color: COLORS.primary },
+              profile.tab,
+              activeTab === "posts" && { borderBottomColor: COLORS.primary },
             ]}
+            onPress={() => setActiveTab("posts")}
           >
-            Posts
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={[
+                profile.tabText,
+                activeTab === "posts" && { color: COLORS.primary },
+              ]}
+            >
+              Posts
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            profile.tab,
-            activeTab === "workouts" && { borderBottomColor: COLORS.primary },
-          ]}
-          onPress={() => setActiveTab("workouts")}
-        >
-          <Text
+          <TouchableOpacity
             style={[
-              profile.tabText,
-              activeTab === "workouts" && { color: COLORS.primary },
+              profile.tab,
+              activeTab === "workouts" && { borderBottomColor: COLORS.primary },
             ]}
+            onPress={() => setActiveTab("workouts")}
           >
-            Workouts
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={[
+                profile.tabText,
+                activeTab === "workouts" && { color: COLORS.primary },
+              ]}
+            >
+              Workouts
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Tab Content */}
+        {renderTabContent()}
       </View>
-
-      {/* Tab Content */}
-      {renderTabContent()}
     </View>
   );
 }

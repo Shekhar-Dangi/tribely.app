@@ -21,6 +21,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCloudinaryUpload } from "@/hooks/useCloudinaryUpload";
 import { COLORS } from "@/constants/theme";
 import { profile, union, onboard, editProfile } from "@/constants/styles";
+import { AppHeader } from "@/components/common";
 import { Id } from "@/convex/_generated/dataModel";
 
 // Individual Profile Components
@@ -908,39 +909,42 @@ export default function EditProfile() {
     );
   }
 
-  return (
-    <SafeAreaView style={profile.container}>
-      {/* Header */}
-      <View style={editProfile.header}>
-        <TouchableOpacity onPress={handleGoBack} style={editProfile.backButton}>
-          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-        </TouchableOpacity>
-        <Text style={editProfile.headerTitle}>Edit Profile</Text>
-        <TouchableOpacity
-          onPress={handleSubmit(onSubmit, (errors) => {
-            console.log(errors);
-          })}
-          disabled={isSaving || !hasAnyChanges}
+  // Save button component for header
+  const SaveButton = () => (
+    <TouchableOpacity
+      onPress={handleSubmit(onSubmit, (errors) => {
+        console.log(errors);
+      })}
+      disabled={isSaving || !hasAnyChanges}
+      style={[
+        editProfile.iconButton,
+        (!hasAnyChanges || isSaving) && editProfile.saveButtonDisabled,
+      ]}
+      activeOpacity={0.6}
+    >
+      {isSaving ? (
+        <ActivityIndicator size="small" color={COLORS.text} />
+      ) : (
+        <Text
           style={[
-            editProfile.saveButton,
-            (!hasAnyChanges || isSaving) && editProfile.saveButtonDisabled,
+            editProfile.saveButtonText,
+            (!hasAnyChanges || isSaving) && editProfile.saveButtonTextDisabled,
           ]}
         >
-          {isSaving ? (
-            <ActivityIndicator size="small" color={COLORS.white} />
-          ) : (
-            <Text
-              style={[
-                editProfile.saveButtonText,
-                (!hasAnyChanges || isSaving) &&
-                  editProfile.saveButtonTextDisabled,
-              ]}
-            >
-              Save
-            </Text>
-          )}
-        </TouchableOpacity>
-      </View>
+          Save
+        </Text>
+      )}
+    </TouchableOpacity>
+  );
+
+  return (
+    <View style={profile.container}>
+      <AppHeader
+        title="Edit Profile"
+        showBackButton={true}
+        onBackPress={handleGoBack}
+        rightComponent={<SaveButton />}
+      />
 
       <ScrollView
         style={styles.scrollView}
@@ -1199,7 +1203,7 @@ export default function EditProfile() {
         {/* Bottom Spacing */}
         <View style={{ height: 40 }} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
