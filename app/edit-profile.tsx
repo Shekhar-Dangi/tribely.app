@@ -36,13 +36,11 @@ import OperatingHoursEditor from "@/components/editProfile/gym/OperatingHoursEdi
 import AmenitiesEditor from "@/components/editProfile/gym/AmenitiesEditor";
 import MembershipPlansEditor from "@/components/editProfile/gym/MembershipPlansEditor";
 import GymStatsEditor from "@/components/editProfile/gym/GymStatsEditor";
-import VerificationEditor from "@/components/editProfile/gym/VerificationEditor";
 
 // Brand Profile Components
 import BrandBusinessInfoEditor from "@/components/editProfile/brand/BrandBusinessInfoEditor";
 import PartnershipsEditor from "@/components/editProfile/brand/PartnershipsEditor";
 import CampaignsEditor from "@/components/editProfile/brand/CampaignsEditor";
-import BrandVerificationEditor from "@/components/editProfile/brand/BrandVerificationEditor";
 
 // Location Selector Component
 import LocationSelector from "@/components/LocationSelector";

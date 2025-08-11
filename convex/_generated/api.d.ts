@@ -24,7 +24,6 @@ import type * as http from "../http.js";
 import type * as individuals from "../individuals.js";
 import type * as leaderboard from "../leaderboard.js";
 import type * as posts from "../posts.js";
-import type * as testData from "../testData.js";
 import type * as users from "../users.js";
 
 /**
@@ -47,7 +46,6 @@ declare const fullApi: ApiFromModules<{
   individuals: typeof individuals;
   leaderboard: typeof leaderboard;
   posts: typeof posts;
-  testData: typeof testData;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

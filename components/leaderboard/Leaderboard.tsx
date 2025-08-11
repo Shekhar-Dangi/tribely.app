@@ -1,13 +1,7 @@
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  COLORS,
-  FONTS,
-  SPACING,
-  SHADOWS,
-  BORDER_RADIUS,
-} from "@/constants/theme";
+import { COLORS, FONTS, SPACING } from "@/constants/theme";
 
 interface LeaderboardUser {
   _id: string;
