@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.shekhardangi.tribely",
-      "versionCode": 11
+      "versionCode": 13
     },
     "web": {
       "bundler": "metro",

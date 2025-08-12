@@ -70,4 +70,39 @@ http.route({
   }),
 });
 
+// Dummy deleteuser GET and POST endpoints
+http.route({
+  path: "/deleteuser",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "User deleted successfully (dummy GET)",
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }),
+});
+
+http.route({
+  path: "/deleteuser",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "User deleted successfully (dummy POST)",
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }),
+});
+
 export default http;
