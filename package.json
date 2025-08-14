@@ -12,16 +12,22 @@
   },
   "dependencies": {
     "@clerk/clerk-expo": "^2.14.14",
+    "@elevenlabs/elevenlabs-js": "^2.9.0",
     "@expo/server": "^0.6.3",
     "@expo/vector-icons": "^14.1.0",
+    "@react-native-community/datetimepicker": "8.4.1",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
     "convex": "^1.25.4",
+    "crypto": "^1.0.1",
     "expo": "~53.0.20",
+    "expo-audio": "^0.4.8",
+    "expo-av": "^15.1.7",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.7",
     "expo-dev-client": "~5.2.4",
+    "expo-file-system": "^18.1.11",
     "expo-font": "~13.3.2",
     "expo-haptics": "~14.1.4",
     "expo-image": "~2.4.0",
@@ -46,8 +52,7 @@
     "react-native-screens": "~4.11.1",
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
-    "svix": "^1.70.0",
-    "@react-native-community/datetimepicker": "8.4.1"
+    "svix": "^1.70.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

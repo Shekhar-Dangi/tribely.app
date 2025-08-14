@@ -291,15 +291,52 @@ export default defineSchema({
     summary: v.optional(v.string()), // AI-generated summary
 
     // Workout Details
-    duration: v.number(), // in minutes
-    intensity: v.optional(v.number()), // 1-10 scale
-    workoutType: v.optional(v.string()), // "strength", "cardio", "flexibility", etc.
+    duration: v.optional(v.number()), // in minutes
+    volume: v.optional(v.number()), // 1-10 scale
+    workoutType: v.optional(
+      v.union(
+        v.literal("resistance"),
+        v.literal("cardio"),
+        v.literal("mobility"),
+        v.literal("mixed") // fallback for custom types
+      )
+    ),
     exercises: v.optional(v.array(v.string())), // extracted from transcription
+
+    // Organized format details
+    resistanceDetails: v.optional(
+      v.array(
+        v.object({
+          exercise: v.string(),
+          sets: v.number(),
+          reps: v.array(v.number()),
+          weight: v.array(v.number()),
+        })
+      )
+    ),
+    cardioDetails: v.optional(
+      v.array(
+        v.object({
+          type: v.string(),
+          distance: v.optional(v.number()),
+          duration: v.optional(v.number()),
+        })
+      )
+    ),
+    mobilityDetails: v.optional(
+      v.array(
+        v.object({
+          type: v.string(),
+          duration: v.number(),
+        })
+      )
+    ),
 
     // Metadata
     tags: v.optional(v.array(v.string())),
     creditsUsed: v.number(),
     isProcessed: v.boolean(), // AI processing status
+    isEdited: v.optional(v.boolean()),
 
     createdAt: v.number(),
   })
@@ -439,10 +476,15 @@ export default defineSchema({
     .index("by_trainee", ["traineeId", "scheduledAt"])
     .index("by_status", ["status"]),
 
+  chatUsers: defineTable({
+    chatId: v.id("chats"),
+    userId: v.id("users"),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_chat_id", ["chatId"])
+    .index("by_chat_and_user", ["chatId", "userId"]),
   // ──────── CHAT SYSTEM ────────
   chats: defineTable({
-    userIds: v.array(v.id("users")), // always exactly 2 users
-
     // Chat Metadata
     lastMessageAt: v.number(),
     lastMessagePreview: v.optional(v.string()),
@@ -457,10 +499,7 @@ export default defineSchema({
     relatedRequestId: v.optional(v.id("trainRequests")),
 
     createdAt: v.number(),
-  })
-    .index("by_users", ["userIds"])
-    .index("by_last_message", ["lastMessageAt"])
-    .index("by_user_activity", ["userIds", "isActive"]),
+  }).index("by_last_message", ["lastMessageAt"]),
 
   messages: defineTable({
     chatId: v.id("chats"),
@@ -615,7 +654,7 @@ export default defineSchema({
       v.literal("manual_adjustment") // for admin adjustments
     ),
     pointsEarned: v.number(), // can be positive or negative
-    description: v.string(), // "Posted a new workout", "Joined Morning Yoga Event"
+    description: v.optional(v.string()), // "Posted a new workout", "Joined Morning Yoga Event"
 
     // Optional metadata for context
     relatedId: v.optional(v.string()), // eventId, workoutId, etc.

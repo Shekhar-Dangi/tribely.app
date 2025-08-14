@@ -267,6 +267,9 @@ export const profile = StyleSheet.create({
   // Action Buttons
   actionButtons: {
     flexDirection: "row",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     gap: SPACING.md,
     marginTop: SPACING.md,
     marginBottom: SPACING.md,

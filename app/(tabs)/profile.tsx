@@ -16,6 +16,7 @@ import {
   isGymProfile,
   isBrandProfile,
 } from "@/types/schema";
+import WorkoutText from "@/components/workouts/WorkoutText";
 
 export default function Profile() {
   const { user } = useUser();
@@ -38,7 +39,7 @@ export default function Profile() {
   };
 
   const handleMessages = () => {
-    console.log("Messages pressed");
+    router.push("/chat");
   };
 
   const renderTabContent = () => {
@@ -102,9 +103,7 @@ export default function Profile() {
       case "workouts":
         return (
           <View style={profile.tabContent}>
-            <Text style={profile.contentPlaceholder}>
-              Workouts coming soon!
-            </Text>
+            <WorkoutText />
           </View>
         );
       default:

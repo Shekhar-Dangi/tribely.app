@@ -23,6 +23,7 @@ import {
   isBrandProfile,
 } from "@/types/schema";
 import { ProfileHeader } from "@/components";
+import ChatButton from "@/components/chat/ChatButton";
 
 export default function UserProfile() {
   const { username } = useLocalSearchParams<{ username: string }>();
@@ -63,6 +64,7 @@ export default function UserProfile() {
   const followUser = useMutation(api.follows.followUser);
   const unfollowUser = useMutation(api.follows.unfollowUser);
   const sendTrainingRequest = useMutation(api.follows.sendTrainingRequest);
+  const createOrGetChat = useMutation(api.chats.createOrGetChat);
 
   const handleTrain = async () => {
     if (!currentUser || !userData) return;
@@ -97,6 +99,31 @@ export default function UserProfile() {
       }
     } catch (error) {
       console.error("Failed to follow/unfollow user:", error);
+    }
+  };
+
+  const handleChat = async () => {
+    if (!currentUser || !userData || isOwnProfile) return;
+
+    try {
+      const chatId = await createOrGetChat({
+        otherUserId: userData._id,
+        reason: "direct_message",
+      });
+
+      console.log(chatId);
+
+      // Navigate to chat screen
+      router.push(
+        `/chat?chatId=${chatId}&otherUser=${JSON.stringify({
+          _id: userData._id,
+          username: userData.username,
+          avatarUrl: userData.avatarUrl,
+          isVerified: userData.isVerified,
+        })}`
+      );
+    } catch (error) {
+      console.error("Failed to create chat:", error);
     }
   };
 
@@ -207,6 +234,7 @@ export default function UserProfile() {
             }
             style={profile.avatar}
           />
+          {/* Chat button for other users */}
         </View>
         <View style={profile.statsContainer}>
           <TouchableOpacity style={profile.statItem}>
@@ -286,6 +314,7 @@ export default function UserProfile() {
             </TouchableOpacity>
           </>
         )}
+        {!isOwnProfile && <ChatButton onPress={handleChat} size={20} />}
       </View>
 
       {/* Tab Navigation */}

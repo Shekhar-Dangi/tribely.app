@@ -13,7 +13,9 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as activityTransaction from "../activityTransaction.js";
 import type * as brands from "../brands.js";
+import type * as chats from "../chats.js";
 import type * as cloudinary from "../cloudinary.js";
 import type * as cloudinaryActions from "../cloudinaryActions.js";
 import type * as events from "../events.js";
@@ -25,6 +27,7 @@ import type * as individuals from "../individuals.js";
 import type * as leaderboard from "../leaderboard.js";
 import type * as posts from "../posts.js";
 import type * as users from "../users.js";
+import type * as workouts from "../workouts.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -35,7 +38,9 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  activityTransaction: typeof activityTransaction;
   brands: typeof brands;
+  chats: typeof chats;
   cloudinary: typeof cloudinary;
   cloudinaryActions: typeof cloudinaryActions;
   events: typeof events;
@@ -47,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   leaderboard: typeof leaderboard;
   posts: typeof posts;
   users: typeof users;
+  workouts: typeof workouts;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
