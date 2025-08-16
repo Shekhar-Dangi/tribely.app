@@ -16,7 +16,15 @@ interface EventCardProps {
     description: string;
     date: number;
     endDate?: number;
-    location?: string;
+    location?: {
+      city?: string;
+      state?: string;
+      country?: string;
+      coordinates?: {
+        latitude: number;
+        longitude: number;
+      };
+    };
     maxParticipants?: number;
     eventType: "workout" | "competition" | "meetup" | "seminar";
     rsvpCount: number;
@@ -128,7 +136,9 @@ export default function EventCard({ event, onPress }: EventCardProps) {
                 color={COLORS.textMuted}
               />
               <Text style={styles.detailText} numberOfLines={1}>
-                {event.location}
+                {[event.location.city, event.location.state, event.location.country]
+                  .filter(Boolean)
+                  .join(", ")}
               </Text>
             </View>
           )}

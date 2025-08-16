@@ -34,6 +34,46 @@ export const getLeaderboard = query({
   },
 });
 
+// Get user's ranking position
+export const getUserRanking = query({
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    // Get the user's individual profile
+    const userIndividual = await ctx.db
+      .query("individuals")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .first();
+    
+    if (!userIndividual) {
+      return null; // User is not an individual (might be gym or brand)
+    }
+    
+    // Get all individuals sorted by activity score
+    const allIndividuals = await ctx.db
+      .query("individuals")
+      .withIndex("by_activity_score")
+      .order("desc")
+      .collect();
+    
+    // Find the user's position
+    const userPosition = allIndividuals.findIndex(
+      (individual) => individual.userId === args.userId
+    );
+    
+    if (userPosition === -1) {
+      return null;
+    }
+    
+    return {
+      position: userPosition + 1, // Convert from 0-indexed to 1-indexed
+      totalUsers: allIndividuals.length,
+      activityScore: userIndividual.activityScore,
+    };
+  },
+});
+
 // Get recent activity transactions for all users (activity feed)
 export const getRecentActivityFeed = query({
   args: {

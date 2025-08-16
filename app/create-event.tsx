@@ -22,13 +22,22 @@ import { COLORS } from "@/constants/theme";
 import { onboard, union } from "@/constants/styles";
 import { AppHeader } from "@/components/common";
 import { Id } from "@/convex/_generated/dataModel";
+import LocationSelector from "@/components/LocationSelector";
 
 interface CreateEventForm {
   title: string;
   description: string;
   date: Date;
   endDate?: Date;
-  location?: string;
+  location?: {
+    city: string;
+    state: string;
+    country: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+  };
   maxParticipants?: string;
   eventType: "workout" | "competition" | "meetup" | "seminar";
   isPublic: boolean;
@@ -89,7 +98,7 @@ export default function CreateEvent() {
       description: "",
       date: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
       endDate: undefined,
-      location: "",
+      location: undefined,
       maxParticipants: "",
       eventType: "workout",
       isPublic: true,
@@ -149,11 +158,14 @@ export default function CreateEvent() {
     }
 
     // Location validation (optional but if provided, should be reasonable)
-    if (data.location && data.location.trim()) {
-      if (data.location.length < 3) {
+    if (data.location) {
+      const locationString = [data.location.city, data.location.state, data.location.country]
+        .filter(Boolean)
+        .join(", ");
+      if (locationString.length < 3) {
         return "Location must be at least 3 characters long";
       }
-      if (data.location.length > 200) {
+      if (locationString.length > 200) {
         return "Location must be less than 200 characters";
       }
     }
@@ -196,7 +208,7 @@ export default function CreateEvent() {
         description: data.description.trim(),
         date: data.date.getTime(),
         endDate: data.endDate ? data.endDate.getTime() : undefined,
-        location: data.location?.trim() || undefined,
+        location: data.location || undefined,
         maxParticipants: data.maxParticipants?.trim()
           ? parseInt(data.maxParticipants.trim())
           : undefined,
@@ -241,6 +253,7 @@ export default function CreateEvent() {
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Event Type Selection */}
         <View style={onboard.wideCard}>
@@ -374,36 +387,12 @@ export default function CreateEvent() {
           <Controller
             control={control}
             name="location"
-            rules={{
-              minLength: {
-                value: 3,
-                message: "Location must be at least 3 characters",
-              },
-              maxLength: {
-                value: 200,
-                message: "Location must be less than 200 characters",
-              },
-            }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <View style={union.textInputContainer}>
-                <Text style={union.textInputLabel}>Location</Text>
-                <TextInput
-                  style={[
-                    union.textInput,
-                    errors.location && { borderColor: COLORS.error },
-                  ]}
-                  placeholder="Where will this event take place?"
-                  value={value}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  maxLength={200}
-                />
-                {errors.location && (
-                  <Text style={styles.errorText}>
-                    {errors.location.message}
-                  </Text>
-                )}
-              </View>
+            render={({ field: { onChange, value } }) => (
+              <LocationSelector
+                value={value || { city: "", state: "", country: "" }}
+                onChange={onChange}
+                placeholder="Where will this event take place?"
+              />
             )}
           />
 

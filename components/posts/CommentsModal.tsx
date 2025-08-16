@@ -14,72 +14,29 @@ import { useState, useRef, useEffect } from "react";
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { Post } from "@/types/schema";
-
-interface Comment {
-  id: string;
-  user: {
-    username: string;
-    avatarUrl?: string;
-    isVerified?: boolean;
-  };
-  text: string;
-  createdAt: number;
-  likeCount?: number;
-}
+import { useComments, Comment } from "@/hooks/useComments";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface CommentsModalProps {
   visible: boolean;
   onClose: () => void;
   post: Post;
-  comments?: Comment[];
-  onSubmitComment?: (comment: string) => void;
 }
 
 export default function CommentsModal({
   visible,
   onClose,
   post,
-  comments = [],
-  onSubmitComment,
 }: CommentsModalProps) {
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const textInputRef = useRef<TextInput>(null);
 
-  // Mock comments for now - replace with real data later
-  const mockComments: Comment[] = [
-    {
-      id: "1",
-      user: { username: "john_doe", avatarUrl: undefined, isVerified: false },
-      text: "Great post! 🔥",
-      createdAt: Date.now() - 3600000, // 1 hour ago
-      likeCount: 12,
-    },
-    {
-      id: "2",
-      user: { username: "jane_smith", avatarUrl: undefined, isVerified: true },
-      text: "Love this! Keep it up 💪",
-      createdAt: Date.now() - 7200000, // 2 hours ago
-      likeCount: 8,
-    },
-    {
-      id: "3",
-      user: {
-        username: "fitness_guru",
-        avatarUrl: undefined,
-        isVerified: false,
-      },
-      text: "Amazing technique! Can you share more details about your workout routine?",
-      createdAt: Date.now() - 10800000, // 3 hours ago
-      likeCount: 5,
-    },
-  ];
-
-  const allComments = comments.length > 0 ? comments : mockComments;
+  // Use real comments data
+  const { comments, submitComment, isLoading } = useComments(post._id as Id<"posts">);
 
   useEffect(() => {
     if (visible) {
-      // Focus input after a small delay to allow modal to open
       setTimeout(() => {
         textInputRef.current?.focus();
       }, 300);
@@ -101,15 +58,15 @@ export default function CommentsModal({
 
     setIsSubmitting(true);
 
-    if (onSubmitComment) {
-      await onSubmitComment(comment.trim());
-    } else {
-      // Default behavior - just log for now
-      console.log("Submit comment:", comment.trim(), "for post:", post._id);
+    try {
+      await submitComment(comment.trim());
+      setComment("");
+    } catch (error) {
+      console.error("Failed to submit comment:", error);
+      // You could show an error toast here
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setComment("");
-    setIsSubmitting(false);
   };
 
   const handleLikeComment = (commentId: string) => {
@@ -187,16 +144,21 @@ export default function CommentsModal({
 
         {/* Comments List */}
         <FlatList
-          data={allComments}
+          data={comments}
           renderItem={renderComment}
           keyExtractor={(item) => item.id}
           style={styles.commentsList}
           contentContainerStyle={styles.commentsContent}
           showsVerticalScrollIndicator={false}
+          refreshing={isLoading}
           ListEmptyComponent={() => (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>No comments yet</Text>
-              <Text style={styles.emptySubtitle}>Be the first to comment!</Text>
+              <Text style={styles.emptyTitle}>
+                {isLoading ? "Loading comments..." : "No comments yet"}
+              </Text>
+              {!isLoading && (
+                <Text style={styles.emptySubtitle}>Be the first to comment!</Text>
+              )}
             </View>
           )}
         />

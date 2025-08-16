@@ -9,7 +9,19 @@ export const createEvent = mutation({
     description: v.string(),
     date: v.number(),
     endDate: v.optional(v.number()),
-    location: v.optional(v.string()),
+    location: v.optional(
+      v.object({
+        city: v.optional(v.string()),
+        state: v.optional(v.string()),
+        country: v.optional(v.string()),
+        coordinates: v.optional(
+          v.object({
+            latitude: v.number(),
+            longitude: v.number(),
+          })
+        ),
+      })
+    ),
     maxParticipants: v.optional(v.number()),
     eventType: v.union(
       v.literal("workout"),
@@ -61,6 +73,73 @@ export const getMyEvents = query({
     );
 
     return eventsWithCreator;
+  },
+});
+
+// Get events user has participated in (RSVP'd to)
+export const getUserParticipatedEvents = query({
+  args: { 
+    userId: v.id("users"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 20;
+    
+    // Get all RSVPs for this user
+    const userRsvps = await ctx.db
+      .query("eventRSVPs")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+    
+    // Filter for events where user is going or maybe
+    const participatingRsvps = userRsvps.filter(
+      rsvp => rsvp.status === "going" || rsvp.status === "maybe"
+    );
+    
+    // Get event details for each RSVP
+    const eventsWithDetails = await Promise.all(
+      participatingRsvps.slice(0, limit).map(async (rsvp) => {
+        const event = await ctx.db.get(rsvp.eventId);
+        if (!event) return null;
+        
+        const creator = await ctx.db.get(event.creatorId);
+        
+        // Get creator's profile for location info
+        let creatorProfile = null;
+        if (creator) {
+          switch (creator.userType) {
+            case "gym":
+              creatorProfile = await ctx.db
+                .query("gyms")
+                .withIndex("by_user", (q) => q.eq("userId", creator._id))
+                .first();
+              break;
+            case "brand":
+              creatorProfile = await ctx.db
+                .query("brands")
+                .withIndex("by_user", (q) => q.eq("userId", creator._id))
+                .first();
+              break;
+          }
+        }
+        
+        return {
+          ...event,
+          creator: creator
+            ? {
+                ...creator,
+                profile: creatorProfile,
+              }
+            : null,
+          userRsvpStatus: rsvp.status,
+        };
+      })
+    );
+    
+    // Filter out null events and sort by date
+    return eventsWithDetails
+      .filter((event) => event !== null)
+      .sort((a, b) => b.date - a.date);
   },
 });
 

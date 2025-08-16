@@ -110,7 +110,7 @@ export interface GymProfile {
   verification?: {
     businessLicense?: string;
     taxId?: string;
-    isVerified: boolean;
+    isVerified?: boolean;
     verificationDate?: number;
   };
   createdAt: number;
@@ -152,7 +152,7 @@ export interface BrandProfile {
   verification?: {
     businessRegistration?: string;
     taxId?: string;
-    isVerified: boolean;
+    isVerified?: boolean;
     verificationDate?: number;
   };
   createdAt: number;
@@ -172,7 +172,7 @@ export interface Post {
   content?: string;
   mediaUrl?: string;
   mediaPublicId?: string;
-  mediaType?: "image" | "video";
+  mediaType?: "image" | "video" | "text";
   mediaDuration?: number;
   mediaQuality?: string;
   privacy: "public" | "friends" | "private";

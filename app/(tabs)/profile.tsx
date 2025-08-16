@@ -17,6 +17,7 @@ import {
   isBrandProfile,
 } from "@/types/schema";
 import WorkoutText from "@/components/workouts/WorkoutText";
+import TrainingTab from "@/components/profile/TrainingTab";
 
 export default function Profile() {
   const { user } = useUser();
@@ -104,6 +105,14 @@ export default function Profile() {
         return (
           <View style={profile.tabContent}>
             <WorkoutText />
+          </View>
+        );
+      case "training":
+        return userData?._id ? (
+          <TrainingTab userId={userData._id as Id<"users">} />
+        ) : (
+          <View style={profile.tabContent}>
+            <Text style={profile.contentPlaceholder}>Loading...</Text>
           </View>
         );
       default:
@@ -235,6 +244,23 @@ export default function Profile() {
               ]}
             >
               Workouts
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              profile.tab,
+              activeTab === "training" && { borderBottomColor: COLORS.primary },
+            ]}
+            onPress={() => setActiveTab("training")}
+          >
+            <Text
+              style={[
+                profile.tabText,
+                activeTab === "training" && { color: COLORS.primary },
+              ]}
+            >
+              Training
             </Text>
           </TouchableOpacity>
         </View>

@@ -66,15 +66,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
       >
         {/* Rank */}
         <View style={styles.rankContainer}>
-          {rankIcon ? (
-            <Ionicons
-              name={rankIcon.name as any}
-              size={24}
-              color={rankIcon.color}
-            />
-          ) : (
+          
             <Text style={styles.rankText}>{rank}</Text>
-          )}
+
         </View>
 
         {/* User Avatar */}
@@ -103,17 +97,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
         <View style={styles.userInfo}>
           <View style={styles.userNameRow}>
             <Text style={styles.username}>{item.username}</Text>
-            <View
-              style={[styles.userTypeBadge, { backgroundColor: userTypeColor }]}
-            >
-              <Text style={styles.userTypeText}>
-                {item.userType.charAt(0).toUpperCase()}
-              </Text>
-            </View>
+         
           </View>
-          <Text style={styles.userType}>
-            {item.userType.charAt(0).toUpperCase() + item.userType.slice(1)}
-          </Text>
+          
         </View>
 
         {/* Activity Score */}

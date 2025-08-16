@@ -8,6 +8,8 @@ import {
 } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { Post } from "@/types/schema";
+import { useState } from "react";
+import CommentsModal from "./CommentsModal";
 
 interface PostCardProps {
   post: Post;
@@ -20,6 +22,7 @@ export default function PostCard({
   variant = "full",
   onPress,
 }: PostCardProps) {
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -111,26 +114,36 @@ export default function PostCard({
       <View style={styles.statsSection}>
         <View style={styles.statsRow}>
           <View style={styles.stats}>
-            <View style={styles.stat}>
+            <TouchableOpacity style={styles.stat}>
               <Ionicons
                 name="heart-outline"
                 size={16}
                 color={COLORS.textSecondary}
               />
               <Text style={styles.statText}>{post.likeCount}</Text>
-            </View>
-            <View style={styles.stat}>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.stat}
+              onPress={() => setShowCommentsModal(true)}
+            >
               <Ionicons
                 name="chatbubble-outline"
                 size={16}
                 color={COLORS.textSecondary}
               />
               <Text style={styles.statText}>{post.commentCount}</Text>
-            </View>
+            </TouchableOpacity>
           </View>
           <Text style={styles.timestamp}>{formatDate(post.createdAt)}</Text>
         </View>
       </View>
+
+      {/* Comments Modal */}
+      <CommentsModal
+        visible={showCommentsModal}
+        onClose={() => setShowCommentsModal(false)}
+        post={post}
+      />
     </TouchableOpacity>
   );
 }

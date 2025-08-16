@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, usePaginatedQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { profile } from "@/constants/styles";
@@ -24,6 +24,8 @@ import {
 } from "@/types/schema";
 import { ProfileHeader } from "@/components";
 import ChatButton from "@/components/chat/ChatButton";
+import WorkoutDisplay from "@/components/workouts/WorkoutDisplay";
+
 
 export default function UserProfile() {
   const { username } = useLocalSearchParams<{ username: string }>();
@@ -49,9 +51,9 @@ export default function UserProfile() {
       : "skip"
   );
 
-  // Training request status
-  const trainingRequestStatus = useQuery(
-    api.follows.hasTrainingRequest,
+  // Get the most recent training request between users
+  const trainingRequest = useQuery(
+    api.follows.getMostRecentTrainingRequest,
     currentUser &&
       userData &&
       !isOwnProfile &&
@@ -64,19 +66,47 @@ export default function UserProfile() {
   const followUser = useMutation(api.follows.followUser);
   const unfollowUser = useMutation(api.follows.unfollowUser);
   const sendTrainingRequest = useMutation(api.follows.sendTrainingRequest);
+  const cancelRequest = useMutation(api.follows.cancelTrainingRequest);
   const createOrGetChat = useMutation(api.chats.createOrGetChat);
 
   const handleTrain = async () => {
     if (!currentUser || !userData) return;
 
-    try {
-      await sendTrainingRequest({
-        requesterId: currentUser._id as Id<"users">,
-        trainerId: userData._id,
-      });
-      console.log("Training request sent successfully");
-    } catch (error) {
-      console.error("Failed to send training request:", error);
+    // If there's a pending request, cancel it
+    if (trainingRequest?.status === "pending") {
+      try {
+        await cancelRequest({ requestId: trainingRequest._id });
+        console.log("Training request cancelled successfully");
+      } catch (error) {
+        console.error("Failed to cancel training request:", error);
+      }
+    } else {
+      // Send new training request
+      try {
+        const result = await sendTrainingRequest({
+          requesterId: currentUser._id as Id<"users">,
+          trainerId: userData._id,
+        });
+        
+        if (result.autoAccepted) {
+          console.log("Training request auto-accepted due to bidirectional request!");
+          // Optionally navigate to chat
+          if (result.chatId) {
+            router.push(
+              `/chat?chatId=${result.chatId}&otherUser=${JSON.stringify({
+                _id: userData._id,
+                username: userData.username,
+                avatarUrl: userData.avatarUrl,
+                isVerified: userData.isVerified,
+              })}`
+            );
+          }
+        } else {
+          console.log("Training request sent successfully");
+        }
+      } catch (error) {
+        console.error("Failed to send training request:", error);
+      }
     }
   };
 
@@ -197,11 +227,17 @@ export default function UserProfile() {
           </View>
         );
       case "workouts":
-        return (
+        return userData?._id ? (
           <View style={profile.tabContent}>
-            <Text style={profile.contentPlaceholder}>
-              Workouts coming soon!
-            </Text>
+            <WorkoutDisplay
+              userId={userData._id as Id<"users">}
+              isOwnProfile={isOwnProfile}
+              username={userData.username}
+            />
+          </View>
+        ) : (
+          <View style={profile.tabContent}>
+            <Text style={profile.contentPlaceholder}>Loading...</Text>
           </View>
         );
       default:
@@ -290,31 +326,61 @@ export default function UserProfile() {
         ) : (
           // Other user's profile buttons
           <>
-            {userData.userType === "individual" &&
-              userData.profile &&
-              isIndividualProfile(userData.profile) &&
-              userData.profile.isTrainingEnabled && (
-                <TouchableOpacity
-                  style={profile.primaryButton}
-                  onPress={handleTrain}
-                >
-                  <Text style={profile.primaryButtonText}>
-                    {trainingRequestStatus === "pending" ? "Pending" : "Train"}
-                  </Text>
-                </TouchableOpacity>
-              )}
-
             <TouchableOpacity
-              style={profile.secondaryButton}
+              style={[
+                profile.primaryButton,
+                isFollowing && { backgroundColor: COLORS.lightGray }
+              ]}
               onPress={handleFollow}
             >
-              <Text style={profile.secondaryButtonText}>
+              <Text style={[
+                profile.primaryButtonText,
+                isFollowing && { color: COLORS.text }
+              ]}>
                 {isFollowing ? "Following" : "Follow"}
               </Text>
             </TouchableOpacity>
+
+            {/* Show Train button conditionally based on status */}
+            {userData.userType === "individual" &&
+             trainingRequest?.status !== "accepted" && (
+              <TouchableOpacity
+                style={[
+                  profile.secondaryButton,
+                  trainingRequest?.status === "pending" && {
+                    backgroundColor: COLORS.lightGray,
+                    borderColor: COLORS.lightGray
+                  },
+                  trainingRequest?.status === "completed" && {
+                    backgroundColor: COLORS.secondary,
+                    borderColor: COLORS.secondary
+                  }
+                ]}
+                onPress={handleTrain}
+              >
+                <Text style={[
+                  profile.secondaryButtonText,
+                  trainingRequest?.status === "pending" && {
+                    color: COLORS.black
+                  },
+                  trainingRequest?.status === "completed" && {
+                    color: COLORS.white
+                  }
+                ]}>
+                  {trainingRequest?.status === "pending"
+                    ? "Withdraw"
+                    : trainingRequest?.status === "completed"
+                    ? "Train Again"
+                    : trainingRequest?.status === "rejected"
+                    ? "Train Again"
+                    : "Train"}
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            <ChatButton onPress={handleChat} size={20} />
           </>
         )}
-        {!isOwnProfile && <ChatButton onPress={handleChat} size={20} />}
       </View>
 
       {/* Tab Navigation */}

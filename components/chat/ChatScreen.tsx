@@ -96,7 +96,31 @@ export default function ChatScreen({
 
   const renderMessage = ({ item }: { item: any }) => {
     const isOwnMessage = currentUser && item.sender?._id === currentUser._id;
+    const isSystemMessage = item.isSystemMessage;
 
+    // Render system message with special styling
+    if (isSystemMessage) {
+      return (
+        <View style={styles.systemMessageContainer}>
+          <View style={styles.systemMessageBubble}>
+            <Ionicons
+              name="trophy"
+              size={20}
+              color={COLORS.primary}
+              style={styles.systemMessageIcon}
+            />
+            <Text style={styles.systemMessageText}>
+              {item.content}
+            </Text>
+          </View>
+          <Text style={styles.systemMessageTime}>
+            {formatMessageTime(item.createdAt)}
+          </Text>
+        </View>
+      );
+    }
+
+    // Regular message rendering
     return (
       <View
         style={[styles.messageContainer, isOwnMessage && styles.ownMessage]}
@@ -283,5 +307,36 @@ const styles = {
   emptyStateSubtext: {
     fontSize: FONTS.sizes.sm,
     color: COLORS.textSecondary,
+  },
+  systemMessageContainer: {
+    alignItems: "center" as const,
+    marginVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+  },
+  systemMessageBubble: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: `${COLORS.primary}10`,
+    borderWidth: 1,
+    borderColor: `${COLORS.primary}30`,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: 20,
+    maxWidth: "90%" as const,
+  },
+  systemMessageIcon: {
+    marginRight: SPACING.sm,
+  },
+  systemMessageText: {
+    fontSize: FONTS.sizes.sm,
+    ...FONTS.medium,
+    color: COLORS.primary,
+    textAlign: "center" as const,
+    flex: 1,
+  },
+  systemMessageTime: {
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.textMuted,
+    marginTop: SPACING.xs,
   },
 };

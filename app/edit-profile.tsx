@@ -71,6 +71,7 @@ interface EditProfileForm {
       weight: string;
       reps: string;
       date: string;
+      media?: string;
     }[];
   };
   experience?: {

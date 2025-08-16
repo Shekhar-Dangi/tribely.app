@@ -123,6 +123,7 @@ export const completeOnboarding = mutation({
               exerciseName: v.string(),
               subtitle: v.string(),
               date: v.number(),
+              media: v.optional(v.string())
             })
           )
         ),

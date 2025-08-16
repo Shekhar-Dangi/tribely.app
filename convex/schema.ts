@@ -82,6 +82,7 @@ export default defineSchema({
             exerciseName: v.string(), // "Bench Press", "5K Run", "Triceps Pushdown", etc.
             subtitle: v.string(),
             date: v.number(), // when this PR was achieved
+            media: v.optional(v.string())
           })
         )
       ),
@@ -380,7 +381,19 @@ export default defineSchema({
     // Event Details
     date: v.number(),
     endDate: v.optional(v.number()),
-    location: v.optional(v.string()),
+    location: v.optional(
+      v.object({
+        city: v.optional(v.string()),
+        state: v.optional(v.string()),
+        country: v.optional(v.string()),
+        coordinates: v.optional(
+          v.object({
+            latitude: v.number(),
+            longitude: v.number(),
+          })
+        ),
+      })
+    ),
     maxParticipants: v.optional(v.number()),
 
     // Event Type & Privacy
@@ -512,6 +525,17 @@ export default defineSchema({
       v.union(v.literal("image"), v.literal("video"), v.literal("audio"))
     ),
 
+    // System Message Fields
+    isSystemMessage: v.optional(v.boolean()),
+    systemMessageType: v.optional(
+      v.union(
+        v.literal("training_accepted"),
+        v.literal("training_completed"),
+        v.literal("chat_created"),
+        v.literal("event_joined")
+      )
+    ),
+
     // Message Status
     readBy: v.optional(v.array(v.id("users"))),
     isDeleted: v.boolean(),
@@ -545,7 +569,8 @@ export default defineSchema({
     status: v.union(
       v.literal("pending"),
       v.literal("accepted"),
-      v.literal("rejected")
+      v.literal("rejected"),
+      v.literal("completed")
     ),
     createdAt: v.number(),
     updatedAt: v.number(),

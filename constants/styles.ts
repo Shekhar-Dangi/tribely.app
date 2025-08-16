@@ -395,7 +395,7 @@ export const profile = StyleSheet.create({
 
   // Card Styles for Data
   dataCard: {
-    ...SHADOWS.small,
+    // ...SHADOWS.small,
     marginBottom: SPACING.md,
   },
   dataCardTitle: {

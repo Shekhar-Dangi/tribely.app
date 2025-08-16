@@ -217,7 +217,11 @@ export default function EventDetails() {
                 size={20}
                 color={COLORS.textMuted}
               />
-              <Text style={styles.detailText}>{event.location}</Text>
+              <Text style={styles.detailText}>
+                {[event.location.city, event.location.state, event.location.country]
+                  .filter(Boolean)
+                  .join(", ")}
+              </Text>
             </View>
           )}
 
