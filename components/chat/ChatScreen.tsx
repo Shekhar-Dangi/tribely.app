@@ -103,12 +103,7 @@ export default function ChatScreen({
       return (
         <View style={styles.systemMessageContainer}>
           <View style={styles.systemMessageBubble}>
-            <Ionicons
-              name="trophy"
-              size={20}
-              color={COLORS.primary}
-              style={styles.systemMessageIcon}
-            />
+       
             <Text style={styles.systemMessageText}>
               {item.content}
             </Text>
@@ -311,17 +306,17 @@ const styles = {
   systemMessageContainer: {
     alignItems: "center" as const,
     marginVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.xs,
   },
   systemMessageBubble: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
     backgroundColor: `${COLORS.primary}10`,
     borderWidth: 1,
-    borderColor: `${COLORS.primary}30`,
+    borderColor: COLORS.lightGray,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
-    borderRadius: 20,
+    borderRadius: SPACING.sm,
     maxWidth: "90%" as const,
   },
   systemMessageIcon: {

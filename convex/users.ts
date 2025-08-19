@@ -19,11 +19,30 @@ export const createUser = mutation({
       return existingUser._id;
     }
 
+    // Generate unique username
+    const baseUsername = args.name.toLowerCase().replace(/\s+/g, "") || `user_${Date.now()}`;
+    let username = baseUsername;
+    let counter = 1;
+    
+    // Check if username already exists and increment counter until unique
+    while (true) {
+      const existingUsername = await ctx.db
+        .query("users")
+        .withIndex("by_username", (q) => q.eq("username", username))
+        .first();
+      
+      if (!existingUsername) {
+        break; // Username is unique
+      }
+      
+      username = `${baseUsername}${counter}`;
+      counter++;
+    }
+
     const userId = await ctx.db.insert("users", {
       clerkId: args.clerkId,
       email: args.email,
-      username:
-        args.name.toLowerCase().replace(/\s+/g, "") || `user_${Date.now()}`,
+      username,
       bio: undefined,
       avatarUrl: args.avatarUrl,
       userType: "individual",

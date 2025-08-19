@@ -134,32 +134,97 @@ export const getUsersByLocation = query({
 });
 
 // Get nearby individuals for suggestions
+// this isn't scalable. will fix it soon.
 export const getNearbyIndividuals = query({
   args: {
+    coordinates: v.optional(
+      v.object({ latitude: v.number(), longitude: v.number() })
+    ),
     city: v.optional(v.string()),
     state: v.optional(v.string()),
+    country: v.optional(v.string()),
     excludeUserId: v.optional(v.id("users")),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { city, state, excludeUserId, limit = 10 } = args;
+    const {
+      coordinates,
+      city,
+      state,
+      country,
+      excludeUserId,
+      limit = 10,
+    } = args;
 
-    // Start with all individual users and filter
-    let results = await ctx.db.query("users").collect();
+    let results: any[] = [];
 
-    // Apply filters
-    results = results.filter((user) => {
-      if (user.userType !== "individual") return false;
-      if (excludeUserId && user._id === excludeUserId) return false;
-      if (city && user.location?.city !== city) return false;
-      if (state && user.location?.state !== state) return false;
-      return true;
-    });
+    // 1. Coordinates available → fallback to country filter + haversine
+    if (coordinates && country) {
+      let candidates = await ctx.db
+        .query("users")
+        .withIndex("by_location_country", (q) =>
+          q.eq("location.country", country)
+        )
+        .filter((q) => q.eq(q.field("userType"), "individual"))
+        .collect();
 
-    // Limit results
+      if (excludeUserId) {
+        candidates = candidates.filter((u) => u._id !== excludeUserId);
+      }
+
+      results = candidates
+      .filter((u) => u.location?.coordinates) 
+      .map((u) => {
+        const coords = u.location!.coordinates!; 
+        const d = haversine(coordinates, coords);
+        return { ...u, distance: d };
+      })
+      .sort((a, b) => a.distance - b.distance);
+    } else {
+      // 2. No coordinates → hierarchical fallback
+      let candidates: any[] = [];
+
+      if (city) {
+        candidates = await ctx.db
+          .query("users")
+          .withIndex("by_location_city", (q) => q.eq("location.city", city))
+          .filter((q) => q.eq(q.field("userType"), "individual"))
+          .collect();
+      }
+
+      if (candidates.length < limit && state) {
+        const stateUsers = await ctx.db
+          .query("users")
+          .withIndex("by_location_state", (q) => q.eq("location.state", state))
+          .filter((q) => q.eq(q.field("userType"), "individual"))
+          .collect();
+        candidates.push(...stateUsers);
+      }
+
+      if (candidates.length < limit && country) {
+        const countryUsers = await ctx.db
+          .query("users")
+          .withIndex("by_location_country", (q) =>
+            q.eq("location.country", country)
+          )
+          .filter((q) => q.eq(q.field("userType"), "individual"))
+          .collect();
+        candidates.push(...countryUsers);
+      }
+
+      // Deduplicate + exclude
+      const seen = new Set();
+      results = candidates.filter((u) => {
+        if (excludeUserId && u._id === excludeUserId) return false;
+        if (seen.has(u._id)) return false;
+        seen.add(u._id);
+        return true;
+      });
+    }
+
+    // 3. Apply limit and fetch profiles
     results = results.slice(0, limit);
 
-    // Get profiles for each user
     const usersWithProfiles = await Promise.all(
       results.map(async (user) => {
         const profile = await ctx.db
@@ -174,6 +239,26 @@ export const getNearbyIndividuals = query({
     return usersWithProfiles;
   },
 });
+
+// Haversine now works with { latitude, longitude }
+function haversine(
+  coord1: { latitude: number; longitude: number },
+  coord2: { latitude: number; longitude: number }
+) {
+  const toRad = (x: number) => (x * Math.PI) / 180;
+  const R = 6371; // Earth radius in km
+  const dLat = toRad(coord2.latitude - coord1.latitude);
+  const dLon = toRad(coord2.longitude - coord1.longitude);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(coord1.latitude)) *
+      Math.cos(toRad(coord2.latitude)) *
+      Math.sin(dLon / 2) ** 2;
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 // Get nearby gyms for suggestions
 export const getNearbyGyms = query({

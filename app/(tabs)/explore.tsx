@@ -16,6 +16,8 @@ import { api } from "@/convex/_generated/api";
 import { COLORS, SPACING } from "@/constants/theme";
 import { formatLocation } from "@/utils/location";
 import { AppHeader } from "@/components/common";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface UserProfile {
   _id: string;
@@ -24,6 +26,11 @@ interface UserProfile {
   location?: {
     city?: string;
     state?: string;
+    country?: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    }
   };
   avatarUrl?: string;
   bio?: string;
@@ -32,8 +39,8 @@ interface UserProfile {
 export default function ExploreScreen() {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
+  const userData = useCurrentUser();
 
-  // Search query
   const searchResults = useQuery(
     api.explore.searchUsers,
     searchTerm.length > 0
@@ -46,7 +53,11 @@ export default function ExploreScreen() {
 
   // Location-based suggestions
   const nearbyIndividuals = useQuery(api.explore.getNearbyIndividuals, {
+    city: userData?.location?.city,
     limit: 3,
+    state: userData?.location?.state,
+    coordinates: userData?.location?.coordinates,
+    excludeUserId: userData?._id as Id<"users">
   });
 
   const nearbyGyms = useQuery(api.explore.getNearbyGyms, {

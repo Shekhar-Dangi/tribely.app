@@ -214,7 +214,7 @@ export const sendTrainingRequest = mutation({
       await ctx.db.insert("messages", {
         chatId,
         senderId: trainerId,
-        content: `🎯 You and @${requester?.username} have agreed to train together!`,
+        content: `You and @${requester?.username} have agreed to train together!`,
         readBy: [],
         isDeleted: false,
         isEdited: false,
@@ -452,7 +452,7 @@ export const acceptTrainingRequest = mutation({
     await ctx.db.insert("messages", {
       chatId,
       senderId: request.trainerId, // System message from trainer's perspective
-      content: `🎯 You and @${requester.username} have agreed to train together!`,
+      content: `You and @${requester.username} have agreed to train together!`,
       readBy: [],
       isDeleted: false,
       isEdited: false,

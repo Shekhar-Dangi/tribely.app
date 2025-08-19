@@ -58,6 +58,7 @@ export default defineSchema({
     .index("by_location_state", ["location.state"])
     .index("by_follower_count", ["followerCount"])
     .index("by_premium_status", ["isPremium"])
+    .index("by_location_country", ["location.country"])
     .searchIndex("search_users", {
       searchField: "username",
       filterFields: [

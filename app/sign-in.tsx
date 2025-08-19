@@ -11,6 +11,8 @@ import {
   BORDER_RADIUS,
   SHADOWS,
 } from "../constants/theme";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
@@ -48,6 +50,7 @@ export default function Page() {
   }, [startSSOFlow]);
 
   return (
+    <LinearGradient colors={["#E3E3E3", "#ffffff"]} start={[0, 0]} end={[1, 1]} style={{flex: 1}}>
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.content}>
         {/* Header Section */}
@@ -63,28 +66,25 @@ export default function Page() {
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Welcome to Tribely</Text>
             <Text style={styles.subtitle}>
-              Connect with fitness enthusiasts, gyms, and brands in your
-              community
+              Show your stats, train with people.
             </Text>
+           
           </View>
         </View>
 
         {/* Sign In Section */}
         <View style={styles.signInSection}>
-          <Text style={styles.signInTitle}>Get Started</Text>
+
 
           <Pressable style={styles.googleButton} onPress={onPress}>
             <View style={styles.buttonContent}>
-              <Image
-                source={require("../assets/images/google-icon.svg")}
-                style={styles.googleIcon}
-              />
+            <Ionicons name="logo-google" style={{color: COLORS.primary, marginHorizontal: SPACING.md, fontSize: FONTS.sizes.md}} />
               <Text style={styles.buttonText}>Continue with Google</Text>
             </View>
           </Pressable>
 
           <Text style={styles.termsText}>
-            By continuing, you agree to our Terms of Service and Privacy Policy
+            By continuing, you agree to our <Text style={{color: COLORS.primary, textDecorationLine: "underline"}}>Terms of Service </Text>and <Text style={{color: COLORS.primary, textDecorationLine: "underline" }}>Privacy Policy</Text><Text>.</Text>
           </Text>
         </View>
       </View>
@@ -96,13 +96,14 @@ export default function Page() {
         </Text>
       </View>
     </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+
   },
   content: {
     flex: 1,
@@ -115,7 +116,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingTop: SPACING.xxxl,
   },
   logoContainer: {
     marginBottom: SPACING.xxl,
@@ -148,7 +148,9 @@ const styles = StyleSheet.create({
 
   // Sign In Section
   signInSection: {
-    paddingBottom: SPACING.xxl,
+    paddingBottom: SPACING.md,
+    borderBottomColor: COLORS.darkGray,
+    borderBottomWidth: 1
   },
   signInTitle: {
     fontSize: FONTS.sizes.lg,
@@ -161,18 +163,20 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
-    paddingVertical: SPACING.lg,
+    paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.xl,
     borderRadius: BORDER_RADIUS.md,
     width: "100%",
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: SPACING.lg,
-    ...SHADOWS.medium,
+    ...SHADOWS.small,
   },
   buttonContent: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    justifyContent: "center",
+    alignContent: "center"
   },
   googleIcon: {
     width: 24,
@@ -191,11 +195,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
     paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md
   },
 
   // Footer Section
   footer: {
-    paddingBottom: SPACING.xl,
+    paddingVertical: SPACING.xl,
+
     paddingHorizontal: SPACING.md,
   },
   footerText: {
