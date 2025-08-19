@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery, useMutation, usePaginatedQuery } from "convex/react";
@@ -71,6 +72,10 @@ export default function UserProfile() {
 
   const handleTrain = async () => {
     if (!currentUser || !userData) return;
+    console.log(trainingRequest)
+    if(trainingRequest?.status === "accepted"){
+      Alert.alert("Already in progress!")
+    }
 
     // If there's a pending request, cancel it
     if (trainingRequest?.status === "pending") {

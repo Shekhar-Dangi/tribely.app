@@ -613,7 +613,15 @@ export const getMostRecentTrainingRequest = query({
       .order("desc")
       .first();
 
-    return request;
+      const secondRequest = await ctx.db
+      .query("trainingRequests")
+      .withIndex("by_requester_trainer", (q) =>
+        q.eq("requesterId", args.trainerId).eq("trainerId", args.requesterId)
+      )
+      .order("desc")
+      .first();
+
+    return request ? request : secondRequest;
   },
 });
 
