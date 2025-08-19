@@ -13,6 +13,7 @@ import { COLORS, FONTS, SPACING, BORDER_RADIUS } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCloudinaryUpload } from "@/hooks/useCloudinaryUpload";
+import { useCurrentUserPostCount } from "@/hooks/usePosts";
 import { AppHeader } from "@/components/common";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -24,6 +25,7 @@ type PrivacyType = "public" | "friends" | "private";
 export default function Create() {
   const { user } = useUser();
   const userData = useCurrentUser();
+  const postCount = useCurrentUserPostCount();
   const {
     uploadImage,
     isUploading,
@@ -39,6 +41,8 @@ export default function Create() {
 
   const maxCharacters = 2000;
   const remainingChars = maxCharacters - textContent.length;
+  const maxPosts = 4;
+  const isAtPostLimit = (postCount ?? 0) >= maxPosts;
 
   const handlePost = async () => {
     if (activePostType === "text" && textContent.trim().length === 0) {
@@ -55,6 +59,15 @@ export default function Create() {
 
     if (!user?.id) {
       Alert.alert("Error", "You must be logged in to create a post");
+      return;
+    }
+
+    // Check post limit on frontend
+    if (isAtPostLimit) {
+      Alert.alert(
+        "Post Limit Reached",
+        "You have reached the maximum limit of 4 posts. Please delete an existing post to create a new one."
+      );
       return;
     }
 
@@ -95,7 +108,8 @@ export default function Create() {
       setActivePostType("text");
     } catch (error) {
       console.error("Post creation error:", error);
-      Alert.alert("Error", "Failed to create post. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to create post. Please try again.";
+      Alert.alert("Error", errorMessage);
     }
   };
 
@@ -281,40 +295,34 @@ export default function Create() {
   );
 
   // Post button component for header
-  const PostButton = () => (
-    <TouchableOpacity
-      style={[
-        styles.postButton,
-        (activePostType === "text" && textContent.trim().length === 0) ||
-        ((activePostType === "image" || activePostType === "video") &&
-          !selectedMedia) ||
-        isUploading
-          ? styles.postButtonDisabled
-          : styles.postButtonEnabled,
-      ]}
-      onPress={handlePost}
-      disabled={
-        (activePostType === "text" && textContent.trim().length === 0) ||
-        ((activePostType === "image" || activePostType === "video") &&
-          !selectedMedia) ||
-        isUploading
-      }
-    >
-      <Text
+  const PostButton = () => {
+    const isDisabled =
+      (activePostType === "text" && textContent.trim().length === 0) ||
+      ((activePostType === "image" || activePostType === "video") &&
+        !selectedMedia) ||
+      isUploading ||
+      isAtPostLimit;
+
+    return (
+      <TouchableOpacity
         style={[
-          styles.postButtonText,
-          (activePostType === "text" && textContent.trim().length === 0) ||
-          ((activePostType === "image" || activePostType === "video") &&
-            !selectedMedia) ||
-          isUploading
-            ? styles.postButtonTextDisabled
-            : styles.postButtonTextEnabled,
+          styles.postButton,
+          isDisabled ? styles.postButtonDisabled : styles.postButtonEnabled,
         ]}
+        onPress={handlePost}
+        disabled={isDisabled}
       >
-        {isUploading ? "Posting..." : "Post"}
-      </Text>
-    </TouchableOpacity>
-  );
+        <Text
+          style={[
+            styles.postButtonText,
+            isDisabled ? styles.postButtonTextDisabled : styles.postButtonTextEnabled,
+          ]}
+        >
+          {isUploading ? "Posting..." : isAtPostLimit ? "Limit Reached" : "Post"}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -363,6 +371,23 @@ export default function Create() {
 
         {/* Privacy Selector */}
         {renderPrivacySelector()}
+
+        {/* Post Limit Warning */}
+        <View style={styles.postLimitContainer}>
+          <View style={styles.postLimitInfo}>
+            <Text style={styles.postLimitText}>
+              Posts: {postCount ?? 0}/{maxPosts}
+            </Text>
+            {isAtPostLimit && (
+              <View style={styles.limitWarning}>
+                <Ionicons name="warning" size={16} color={COLORS.warning} />
+                <Text style={styles.limitWarningText}>
+                  You&apos;ve reached the maximum limit of {maxPosts} posts
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
 
         {/* Content Input */}
         {activePostType === "text" ? renderTextPost() : renderMediaPost()}
@@ -612,5 +637,34 @@ const styles = {
     padding: SPACING.md,
     minHeight: 80,
     textAlignVertical: "top" as const,
+  },
+  postLimitContainer: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  postLimitInfo: {
+    gap: SPACING.sm,
+  },
+  postLimitText: {
+    fontSize: FONTS.sizes.sm,
+    color: COLORS.textSecondary,
+    ...FONTS.medium,
+  },
+  limitWarning: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: SPACING.xs,
+    backgroundColor: COLORS.background,
+    padding: SPACING.sm,
+    borderRadius: BORDER_RADIUS.sm,
+    borderLeftColor: COLORS.warning,
+  },
+  limitWarningText: {
+    fontSize: FONTS.sizes.xs,
+    color: COLORS.warning,
+    ...FONTS.medium,
+    flex: 1,
   },
 };

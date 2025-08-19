@@ -34,6 +34,16 @@ export const createPost = mutation({
       throw new Error("User not found");
     }
 
+    // Check post limit (4 posts maximum)
+    const userPostCount = await ctx.db
+      .query("posts")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    if (userPostCount.length >= 4) {
+      throw new Error("You have reached the maximum limit of 4 posts. Please delete an existing post to create a new one.");
+    }
+
     // Create post
     const postId = await ctx.db.insert("posts", {
       userId: user._id,
@@ -173,6 +183,38 @@ export const getUserPosts = query({
     );
 
     return postsWithUsers;
+  },
+});
+
+/**
+ * Get the current user's post count
+ */
+export const getCurrentUserPostCount = query({
+  args: {},
+  handler: async (ctx) => {
+    // Get current user
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return 0;
+    }
+
+    // Get user from database
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!user) {
+      return 0;
+    }
+
+    // Count user's posts
+    const userPosts = await ctx.db
+      .query("posts")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+
+    return userPosts.length;
   },
 });
 

@@ -23,6 +23,13 @@ export function useFeedPosts(limit?: number) {
 }
 
 /**
+ * Hook to get current user's post count
+ */
+export function useCurrentUserPostCount() {
+  return useQuery(api.posts.getCurrentUserPostCount);
+}
+
+/**
  * Hook to get a specific post by ID (when we add this query later)
  */
 export function usePost(postId?: Id<"posts">) {
